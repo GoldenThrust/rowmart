@@ -10,18 +10,18 @@ describe("Marketplace (UUPS)", function () {
     const [owner, seller, buyer, feeRecipient, arbitrator, other] =
       await ethers.getSigners();
 
-    // Deploy mock token
+    // Deploy mock Token
     const Token = await ethers.deployContract("MockERC20");
-    const tokenAddress = await Token.getAddress();
-    networkHelpers.setBalance(tokenAddress, 1000000n);
+    const TokenAddress = await Token.getAddress();
+    networkHelpers.setBalance(TokenAddress, 1000000n);
 
-    // Mint tokens to buyer
+    // Mint Tokens to buyer
     await Token.mint(buyer.address, ethers.parseEther("1000"));
 
     // Deploy Marketplace (UUPS)
     const marketplace = await ethers.deployContract("Marketplace");
     await marketplace.initialize(
-      tokenAddress,
+      TokenAddress,
       feeRecipient.address,
       arbitrator.address
     );
@@ -112,12 +112,11 @@ describe("Marketplace (UUPS)", function () {
     const { marketplace, seller } = await loadFixture(deployFixture);
 
     await expect(
-      marketplace.connect(seller).createProduct(
-        ethers.parseEther("10"),
-        "ipfs://product"
-      )
+      marketplace
+        .connect(seller)
+        .createProduct(ethers.parseEther("10"), "ipfs://product")
     )
-    .to.emit(marketplace, "ProductCreated")
+      .to.emit(marketplace, "ProductCreated")
       .withArgs(1, seller.address);
 
     const product = await marketplace.products(1);
@@ -128,27 +127,20 @@ describe("Marketplace (UUPS)", function () {
   it("price and uri bytes must be greater than zero", async () => {
     const { marketplace, seller } = await loadFixture(deployFixture);
     await expect(
-      marketplace.connect(seller).createProduct(
-        0,
-        "ipfs://product"
-      )
+      marketplace.connect(seller).createProduct(0, "ipfs://product")
     ).to.be.revertedWith("Price and URI bytes must be greater than zero");
 
     await expect(
-      marketplace.connect(seller).createProduct(
-        ethers.parseEther("10"),
-        ""
-      )
+      marketplace.connect(seller).createProduct(ethers.parseEther("10"), "")
     ).to.be.revertedWith("Price and URI bytes must be greater than zero");
   });
 
   it("seller can update product price", async () => {
     const { marketplace, seller } = await loadFixture(deployFixture);
 
-    await marketplace.connect(seller).createProduct(
-      ethers.parseEther("10"),
-      "ipfs://product"
-    );
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
 
     await expect(
       marketplace.connect(seller).setProductPrice(1, ethers.parseEther("15"))
@@ -163,10 +155,9 @@ describe("Marketplace (UUPS)", function () {
   it("seller cannot update product price to zero", async () => {
     const { marketplace, seller } = await loadFixture(deployFixture);
 
-    await marketplace.connect(seller).createProduct(
-      ethers.parseEther("10"),
-      "ipfs://product"
-    );
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
 
     await expect(
       marketplace.connect(seller).setProductPrice(1, 0)
@@ -176,10 +167,9 @@ describe("Marketplace (UUPS)", function () {
   it("non-seller cannot update product price", async () => {
     const { marketplace, seller, buyer } = await loadFixture(deployFixture);
 
-    await marketplace.connect(seller).createProduct(
-      ethers.parseEther("10"),
-      "ipfs://product"
-    );
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
 
     await expect(
       marketplace.connect(buyer).setProductPrice(1, ethers.parseEther("15"))
@@ -189,14 +179,11 @@ describe("Marketplace (UUPS)", function () {
   it("seller can update product status", async () => {
     const { marketplace, seller } = await loadFixture(deployFixture);
 
-    await marketplace.connect(seller).createProduct(
-      ethers.parseEther("10"),
-      "ipfs://product"
-    );
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
 
-    await expect(
-      marketplace.connect(seller).setProductStatus(1, false)
-    )
+    await expect(marketplace.connect(seller).setProductStatus(1, false))
       .to.emit(marketplace, "ProductStatusUpdated")
       .withArgs(1, false);
 
@@ -207,13 +194,166 @@ describe("Marketplace (UUPS)", function () {
   it("only seller can update product status", async () => {
     const { marketplace, seller, buyer } = await loadFixture(deployFixture);
 
-    await marketplace.connect(seller).createProduct(
-      ethers.parseEther("10"),
-      "ipfs://product"
-    );
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
 
     await expect(
       marketplace.connect(buyer).setProductStatus(1, false)
     ).to.be.revertedWith("Not seller");
   });
+
+  //   /*//////////////////////////////////////////////////////////////
+  //                         PURCHASE & ESCROW
+  //   //////////////////////////////////////////////////////////////*/
+
+  it("buyer can purchase product", async () => {
+    const { marketplace, seller, buyer, Token } = await loadFixture(
+      deployFixture
+    );
+
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
+
+    await Token.connect(buyer).approve(
+      marketplace.target,
+      ethers.parseEther("10")
+    );
+
+    await expect(marketplace.connect(buyer).buyProduct(1))
+      .to.emit(marketplace, "ProductPurchased")
+      .withArgs(1, 1);
+
+    const txn = await marketplace.transactions(1);
+    expect(txn.buyer).to.equal(buyer.address);
+    expect(txn.status).to.equal(0); // Pending
+  });
+
+  /*//////////////////////////////////////////////////////////////
+                        CONFIRM DELIVERY
+  //////////////////////////////////////////////////////////////*/
+
+  it("buyer can confirm delivery and seller gets paid", async () => {
+    const { marketplace, seller, buyer, Token, feeRecipient } =
+      await loadFixture(deployFixture);
+
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
+
+    await Token.connect(buyer).approve(
+      marketplace.target,
+      ethers.parseEther("10")
+    );
+
+    await marketplace.connect(buyer).buyProduct(1);
+
+    const sellerBalanceBefore = await Token.balanceOf(seller.address);
+
+    await expect(marketplace.connect(buyer).confirmDelivery(1)).to.emit(
+      marketplace,
+      "TransactionCompleted"
+    );
+
+    const sellerBalanceAfter = await Token.balanceOf(seller.address);
+    const fee = (ethers.parseEther("10") * 300n) / 10_000n;
+
+    expect(sellerBalanceAfter - sellerBalanceBefore).to.equal(
+      ethers.parseEther("10") - fee
+    );
+
+    expect(await Token.balanceOf(feeRecipient.address)).to.equal(fee);
+  });
+
+  //   /*//////////////////////////////////////////////////////////////
+  //                             REFUNDS
+  //   //////////////////////////////////////////////////////////////*/
+
+  it("seller can cancel transaction and refund buyer", async () => {
+    const { marketplace, seller, buyer, Token } = await loadFixture(
+      deployFixture
+    );
+
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
+
+    await Token.connect(buyer).approve(
+      marketplace.target,
+      ethers.parseEther("10")
+    );
+
+    await marketplace.connect(buyer).buyProduct(1);
+
+    const buyerBefore = await Token.balanceOf(buyer.address);
+
+    await expect(marketplace.connect(seller).cancelTransaction(1)).to.emit(
+      marketplace,
+      "TransactionRefunded"
+    );
+
+    const buyerAfter = await Token.balanceOf(buyer.address);
+    expect(buyerAfter - buyerBefore).to.equal(ethers.parseEther("10"));
+  });
+
+  //   /*//////////////////////////////////////////////////////////////
+  //                             DISPUTES
+  //   //////////////////////////////////////////////////////////////*/
+
+  it("buyer can open dispute and arbitrator resolves in buyer favor", async () => {
+    const { marketplace, seller, buyer, Token, arbitrator } = await loadFixture(
+      deployFixture
+    );
+
+    await marketplace
+      .connect(seller)
+      .createProduct(ethers.parseEther("10"), "ipfs://product");
+
+    await Token.connect(buyer).approve(
+      marketplace.target,
+      ethers.parseEther("10")
+    );
+
+    await marketplace.connect(buyer).buyProduct(1);
+    await marketplace.connect(buyer).openDispute(1);
+
+    await expect(marketplace.connect(arbitrator).resolveDispute(1, true))
+      .to.emit(marketplace, "DisputeResolved")
+      .withArgs(1, true);
+
+    const txn = await marketplace.transactions(1);
+    expect(txn.status).to.equal(3); // Refunded
+  });
+
+  //   /*//////////////////////////////////////////////////////////////
+  //                             REVIEWS
+  //   //////////////////////////////////////////////////////////////*/
+
+    it("buyer can submit review after purchase", async () => {
+      const { marketplace, seller, buyer, Token } =
+        await loadFixture(deployFixture);
+
+      await marketplace.connect(seller).createProduct(
+        ethers.parseEther("10"),
+        "ipfs://product"
+      );
+
+      await Token.connect(buyer).approve(
+        marketplace.target,
+        ethers.parseEther("10")
+      );
+
+      await marketplace.connect(buyer).buyProduct(1);
+      await marketplace.connect(buyer).confirmDelivery(1);
+
+      await expect(
+        marketplace.connect(buyer).submitReview(1, 5, "Great product")
+      )
+        .to.emit(marketplace, "ReviewSubmitted")
+        .withArgs(1, buyer.address);
+
+      const avg = await marketplace.getAverageRating(1);
+      expect(avg).to.equal(500); // scaled by 100
+    });
 });
