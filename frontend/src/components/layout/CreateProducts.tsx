@@ -10,8 +10,8 @@ export default function CreateProduct({
 }: {
   setOpenForm: Dispatch<SetStateAction<boolean>>;
 }) {
-  const [userEmail, setuserEmail] = useState<string>("");
-  const [metadataCID, setMetadataCID] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [CID, setCID] = useState<string>("");
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
   const { formatedBalance } = useReadBalance();
@@ -44,8 +44,8 @@ export default function CreateProduct({
       if (email) {
         localStorage.setItem("user-email", email);
       }
-      const cid = response.data;
-      setMetadataCID(cid);
+      const { id, cid } = response.data;
+      setCID(cid);
 
       toast.success("Product listed successfully!", {
         id: "create-product",
@@ -57,7 +57,7 @@ export default function CreateProduct({
         axios
           .delete("/delete-product", {
             data: {
-              metadataCID: cid,
+              id: id,
             },
           })
           .then(() => {
@@ -78,8 +78,8 @@ export default function CreateProduct({
   }
 
   useEffect(() => {
-    setuserEmail(localStorage.getItem("user-email") ?? "");
-  }, [localStorage, setuserEmail]);
+    setUserEmail(localStorage.getItem("user-email") ?? "");
+  }, [setUserEmail]);
 
   return (
     <div className="absolute top-0 left-0 w-screen h-screen bg-black/45">
@@ -116,8 +116,7 @@ export default function CreateProduct({
         />
         <button
           type="submit"
-          // disabled={disableSubmit}
-          disabled={false}
+          disabled={disableSubmit}
           className={`${sufficientBalance ? "bg-gray-900" : "bg-red-500"} cursor-pointer font-bold`}
         >
           {sufficientBalance

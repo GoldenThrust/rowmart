@@ -1,4 +1,3 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useConnect, useConnection } from "wagmi";
 // import { MarketplaceContractConfig } from "./contracts/marketPlace";
 import CreateProduct from "./components/layout/CreateProducts";

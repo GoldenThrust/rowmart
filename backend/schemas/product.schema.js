@@ -27,12 +27,26 @@ export const createProductSchema = {
 };
 
 
+export const getProductSchema = {
+    params: {
+        type: "object",
+        required: ["cid"],
+        properties: {
+            cid: {
+                type: "string",
+                minLength: 10,
+            },
+        },
+        additionalProperties: false,
+    },
+};
+
 export const deleteProductSchema = {
     body: {
         type: "object",
-        required: ["metadataCID"],
+        required: ["id"],
         properties: {
-            metadataCID: {
+            id: {
                 type: "string",
                 minLength: 10,
             },

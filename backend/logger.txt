@@ -96,3 +96,37 @@
 {"level":30,"time":1766881065298,"pid":10196,"hostname":"DESKTOP-QUSRQHA","reqId":"req-2","res":{"statusCode":204},"responseTime":1.430299997329712,"msg":"request completed"}
 {"level":30,"time":1766881065302,"pid":10196,"hostname":"DESKTOP-QUSRQHA","reqId":"req-3","req":{"method":"DELETE","url":"/delete-product","host":"localhost:3000","remoteAddress":"::1","remotePort":60862},"msg":"incoming request"}
 {"level":30,"time":1766881069058,"pid":10196,"hostname":"DESKTOP-QUSRQHA","reqId":"req-3","res":{"statusCode":200},"responseTime":3755.8300999999046,"msg":"request completed"}
+{"level":30,"time":1766881482542,"pid":5784,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766881482548,"pid":5784,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766881485990,"pid":34036,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766881485995,"pid":34036,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766881489400,"pid":24880,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766881489405,"pid":24880,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766917186672,"pid":32504,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766917186680,"pid":32504,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766917484654,"pid":30408,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766917484659,"pid":30408,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766917486906,"pid":30392,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766917486912,"pid":30392,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766917537882,"pid":29036,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766917537891,"pid":29036,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766917546389,"pid":36916,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766917546395,"pid":36916,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766918062009,"pid":13668,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://[::1]:3000"}
+{"level":30,"time":1766918062015,"pid":13668,"hostname":"DESKTOP-QUSRQHA","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1766918589280,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-1","req":{"method":"POST","url":"/create-product","host":"localhost:3000","remoteAddress":"::1","remotePort":65145},"msg":"incoming request"}
+{"level":30,"time":1766918594857,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-1","res":{"statusCode":200},"responseTime":5575.332899987698,"msg":"request completed"}
+{"level":30,"time":1766918608667,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-2","req":{"method":"OPTIONS","url":"/delete-product","host":"localhost:3000","remoteAddress":"::1","remotePort":65145},"msg":"incoming request"}
+{"level":30,"time":1766918608669,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-2","res":{"statusCode":204},"responseTime":1.48089998960495,"msg":"request completed"}
+{"level":30,"time":1766918608672,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-3","req":{"method":"DELETE","url":"/delete-product","host":"localhost:3000","remoteAddress":"::1","remotePort":65145},"msg":"incoming request"}
+{"level":30,"time":1766918610389,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-3","res":{"statusCode":200},"responseTime":1716.54390001297,"msg":"request completed"}
+{"level":30,"time":1766919175042,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-4","req":{"method":"POST","url":"/create-product","host":"localhost:3000","remoteAddress":"::1","remotePort":49495},"msg":"incoming request"}
+{"level":30,"time":1766919179443,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-4","res":{"statusCode":200},"responseTime":4400.51139998436,"msg":"request completed"}
+{"level":30,"time":1766919196347,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-5","req":{"method":"OPTIONS","url":"/delete-product","host":"localhost:3000","remoteAddress":"::1","remotePort":49495},"msg":"incoming request"}
+{"level":30,"time":1766919196348,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-5","res":{"statusCode":204},"responseTime":0.9800999760627747,"msg":"request completed"}
+{"level":30,"time":1766919196351,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-6","req":{"method":"DELETE","url":"/delete-product","host":"localhost:3000","remoteAddress":"::1","remotePort":49495},"msg":"incoming request"}
+{"level":30,"time":1766919199652,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-6","res":{"statusCode":200},"responseTime":3300.766099989414,"msg":"request completed"}
+{"level":30,"time":1766919296051,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-7","req":{"method":"POST","url":"/create-product","host":"localhost:3000","remoteAddress":"::1","remotePort":49826},"msg":"incoming request"}
+{"level":30,"time":1766919300075,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-7","res":{"statusCode":200},"responseTime":4023.893499970436,"msg":"request completed"}
+{"level":30,"time":1766921464932,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-8","req":{"method":"POST","url":"/create-product","host":"localhost:3000","remoteAddress":"::1","remotePort":52076},"msg":"incoming request"}
+{"level":30,"time":1766921469276,"pid":13668,"hostname":"DESKTOP-QUSRQHA","reqId":"req-8","res":{"statusCode":200},"responseTime":4343.506900012493,"msg":"request completed"}

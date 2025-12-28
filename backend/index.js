@@ -2,7 +2,7 @@ import "dotenv/config"
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { PinataSDK } from "pinata"
-import { createProductSchema, deleteProductSchema } from "./schemas/product.schema.js"
+import { createProductSchema, deleteProductSchema, getProductSchema } from "./schemas/product.schema.js"
 import { buffer } from "stream/consumers"
 import { v4 } from "uuid"
 
@@ -82,9 +82,11 @@ fastify.post(
         type: image.metadata.mimetype,
       });
 
-      const upload = await pinata.upload.public.file(file).keyvalues(fields);
+      const { id, cid } = await pinata.upload.public.file(file).keyvalues(fields);
 
-      return reply.send(upload.id);
+      return reply.send({
+        id, cid
+      });
     } catch (err) {
       request.log.error(err);
       return reply.status(500).send({ error: "Upload failed" });
@@ -92,20 +94,48 @@ fastify.post(
   }
 );
 
-fastify.post("/test/create-product", (_, reply) => {
-  return reply.send({
-    metadataURI: "ipfs://product",
-  });
-})
+
+fastify.get(
+  "/get-product",
+  { schema: getProductSchema },
+  async (request, reply) => {
+    try {
+      const { cid } = request.params;
+
+      const result = await pinata.files.public
+        .list()
+        .cid(cid)
+
+      return reply.send({
+        success: true,
+        data: result,
+        message: "Product retrieved successfully",
+      });
+    } catch (err) {
+      request.log.error(err);
+
+      if (err?.response?.status === 404) {
+        return reply.send({
+          success: true,
+          message: "Product already deleted",
+        });
+      }
+
+      return reply.status(500).send({
+        error: "Failed to delete product",
+      });
+    }
+  }
+);
 
 fastify.delete(
   "/delete-product",
   { schema: deleteProductSchema },
   async (request, reply) => {
     try {
-      const { metadataCID } = request.body;
+      const { id } = request.body;
 
-      await pinata.files.public.delete([metadataCID]);
+      await pinata.files.public.delete([id]);
 
       return reply.send({
         success: true,
