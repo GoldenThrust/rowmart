@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-
 contract Marketplace is
     Initializable,
     OwnableUpgradeable,
@@ -25,6 +24,7 @@ contract Marketplace is
     address public arbitrator;
 
     uint96 public platformFeeBps; // 300 = 3%
+    uint256 public createProductFee;
 
     uint256 public productCount;
     uint256 public transactionCount;
@@ -46,7 +46,10 @@ contract Marketplace is
     struct Transaction {
         address buyer;
         address seller;
+        uint256 productId;
+        uint8 quantity;
         uint96 amount;
+        string metadataURI;
         TxStatus status;
     }
 
@@ -77,7 +80,8 @@ contract Marketplace is
     event DisputeResolved(uint256 indexed txnId, bool buyerWon);
 
     event ReviewSubmitted(uint256 indexed productId, address indexed reviewer);
-    event PlatformFeeUpdated(uint96 feeBps);
+    event PlatformFeeUpdated(uint96 oldFeeBps, uint96 newfeeBps);
+    event CreateProductFeeUpdated(uint256 oldFee, uint256 newFee);
     event FeeRecipientUpdated(address recipient);
     event ArbitratorUpdated(address arbitrator);
 
@@ -92,8 +96,8 @@ contract Marketplace is
     ) public initializer {
         require(
             token != address(0) &&
-            _feeRecipient != address(0) &&
-            _arbitrator != address(0),
+                _feeRecipient != address(0) &&
+                _arbitrator != address(0),
             "Invalid address"
         );
 
@@ -105,26 +109,40 @@ contract Marketplace is
         feeRecipient = _feeRecipient;
         arbitrator = _arbitrator;
         platformFeeBps = 300;
+        createProductFee = 10e18;
     }
 
     /*//////////////////////////////////////////////////////////////
                         UPGRADE AUTHORIZATION
     //////////////////////////////////////////////////////////////*/
 
-    function _authorizeUpgrade(address)
-        internal
-        override
-        onlyOwner
-    {}
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /*//////////////////////////////////////////////////////////////
                                 ADMIN
     //////////////////////////////////////////////////////////////*/
 
-    function setPlatformFee(uint96 feeBps) external onlyOwner {
-        require(feeBps >= 200 && feeBps <= 500, "Fee must be between 2% and 5%");
-        platformFeeBps = feeBps;
-        emit PlatformFeeUpdated(feeBps);
+    function setPlatformFee(uint96 newfeeBps) external onlyOwner {
+        require(
+            newfeeBps >= 200 && newfeeBps <= 500,
+            "Fee must be between 2% and 5%"
+        );
+        
+        uint96 oldFeeBps = platformFeeBps;
+        platformFeeBps = newfeeBps;
+        emit PlatformFeeUpdated(oldFeeBps, newfeeBps);
+    }
+
+    function setCreateProductFee(uint256 newFee) external onlyOwner {
+        require(newFee >= 1e16, "Fee too low");
+        require(newFee <= 1_000e18, "Fee too high");
+
+        uint256 oldFee = createProductFee;
+        require(newFee != oldFee, "Same fee");
+
+        createProductFee = newFee;
+
+        emit CreateProductFeeUpdated(oldFee, newFee);
     }
 
     function setFeeRecipient(address recipient) external onlyOwner {
@@ -147,7 +165,14 @@ contract Marketplace is
         uint96 price,
         string calldata uri
     ) external returns (uint256) {
-        require(price > 0 && bytes(uri).length > 0, "Price and URI bytes must be greater than zero");
+        require(
+            price > 0 && bytes(uri).length > 0,
+            "Price and URI bytes must be greater than zero"
+        );
+        require(
+            mneeToken.transferFrom(msg.sender, address(this), createProductFee),
+            "MNEE fee transfer failed"
+        );
 
         unchecked {
             productCount++;
@@ -183,12 +208,21 @@ contract Marketplace is
                         PURCHASE / ESCROW
     //////////////////////////////////////////////////////////////*/
 
-    function buyProduct(uint256 productId) external nonReentrant {
+    function buyProduct(
+        uint256 productId,
+        uint8 quantity,
+        string calldata uri
+    ) external nonReentrant {
         Product storage p = products[productId];
-        require(p.active && p.seller != msg.sender, "Invalid purchase");
+        require(p.active, "Product inactive");
+        require(p.seller != msg.sender, "Seller cannot buy");
+        require(quantity > 0, "Invalid quantity");
+        require(bytes(uri).length > 0, "Invalid URI");
+
+        uint96 totalAmount = p.price * quantity;
 
         require(
-            mneeToken.transferFrom(msg.sender, address(this), p.price),
+            mneeToken.transferFrom(msg.sender, address(this), totalAmount),
             "Payment failed"
         );
 
@@ -199,7 +233,10 @@ contract Marketplace is
         transactions[transactionCount] = Transaction({
             buyer: msg.sender,
             seller: p.seller,
-            amount: p.price,
+            productId: productId,
+            quantity: quantity,
+            amount: totalAmount,
+            metadataURI: uri,
             status: TxStatus.Pending
         });
 
@@ -213,7 +250,7 @@ contract Marketplace is
 
         require(
             t.status == TxStatus.Pending &&
-            (msg.sender == t.buyer || msg.sender == owner()),
+                (msg.sender == t.buyer || msg.sender == owner()),
             "Unauthorized"
         );
 
@@ -225,7 +262,7 @@ contract Marketplace is
 
         require(
             t.status == TxStatus.Pending &&
-            (msg.sender == t.seller || msg.sender == owner()),
+                (msg.sender == t.seller || msg.sender == owner()),
             "Unauthorized"
         );
 
@@ -244,7 +281,7 @@ contract Marketplace is
 
         require(
             t.status == TxStatus.Pending &&
-            (msg.sender == t.buyer || msg.sender == t.seller),
+                (msg.sender == t.buyer || msg.sender == t.seller),
             "Cannot dispute"
         );
 
@@ -303,10 +340,10 @@ contract Marketplace is
     ) external {
         require(
             hasPurchased[productId][msg.sender] &&
-            rating > 0 &&
-            rating <= 5 &&
-            reviews[productId][msg.sender].rating == 0 &&
-            bytes(comment).length <= 200,
+                rating > 0 &&
+                rating <= 5 &&
+                reviews[productId][msg.sender].rating == 0 &&
+                bytes(comment).length <= 200,
             "Invalid review"
         );
 
@@ -317,11 +354,9 @@ contract Marketplace is
         emit ReviewSubmitted(productId, msg.sender);
     }
 
-    function getAverageRating(uint256 productId)
-        external
-        view
-        returns (uint256)
-    {
+    function getAverageRating(
+        uint256 productId
+    ) external view returns (uint256) {
         uint256 count = ratingCount[productId];
         if (count == 0) return 0;
         return (totalRatings[productId] * 100) / count;
