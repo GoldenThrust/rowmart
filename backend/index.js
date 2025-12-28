@@ -5,7 +5,9 @@ import { PinataSDK } from "pinata"
 import { createProductSchema, deleteProductSchema, getProductSchema } from "./schemas/product.schema.js"
 import { buffer } from "stream/consumers"
 import { v4 } from "uuid"
-
+import "dotenv/config"
+import Product from "./models/product.js"
+import mongoosePlugin from "./plugins/mongoosePlugin.js"
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -36,6 +38,10 @@ await fastify.register(import('@fastify/multipart'), {
     fileSize: 1024 * 1024, // 1MB
   },
 })
+
+fastify.register(mongoosePlugin, {
+  uri: process.env.MONGO_URI,
+});
 
 
 fastify.get('/', function (_, reply) {
@@ -81,11 +87,22 @@ fastify.post(
       const file = new File([image.buffer], v4(), {
         type: image.metadata.mimetype,
       });
-
+      
+      
       const { id, cid } = await pinata.upload.public.file(file).keyvalues(fields);
-
+      const product = await Product.create({
+        imageId: id,
+        imageCid: cid,
+        name: fields.name,
+        email: fields.email,
+        price: fields.price,
+        description: fields.description,
+      });
+      
       return reply.send({
-        id, cid
+        success: true,
+        id, cid,
+        product
       });
     } catch (err) {
       request.log.error(err);
@@ -94,6 +111,24 @@ fastify.post(
   }
 );
 
+fastify.put(
+  "/update-product",
+  { schema: createProductSchema },
+  async (request, reply) => {
+    try {
+      const { id, ...fields } = request.body;
+      const updatedProduct = await Product.findByIdAndUpdate(id, fields, { new: true });
+
+      return reply.send({
+        success: true,
+        product: updatedProduct
+      });
+    } catch (err) {
+      request.log.error(err);
+      return reply.status(500).send({ error: "Update failed" });
+    }
+  }
+);
 
 fastify.get(
   "/get-product",

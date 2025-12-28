@@ -41,6 +41,47 @@ export const getProductSchema = {
     },
 };
 
+
+export const updateProductSchema = {
+    body: {
+        type: "object",
+        properties: {
+            name: {
+                type: "string",
+                minLength: 3,
+                maxLength: 100,
+            },
+            price: {
+                type: "string",
+                pattern: "^[0-9]+(\\.[0-9]+)?$",
+            },
+            description: {
+                type: "string",
+                minLength: 10,
+                maxLength: 500,
+            },
+            email: {
+                type: "string",
+                format: "email",
+            },
+            productId: {
+                type: "integer",
+                minLength: 10,
+            },
+            imageId: {
+                type: "string",
+                minLength: 10,
+            },
+            imageCid: {
+                type: "string",
+                minLength: 10,
+            },
+        },
+        additionalProperties: true,
+    },
+};
+
+
 export const deleteProductSchema = {
     body: {
         type: "object",
