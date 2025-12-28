@@ -26,7 +26,10 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
-    productId: Number,
+    productId: {
+        type: Number,
+        required: true
+    }
 })
 
 const Product = model("Product", productSchema);

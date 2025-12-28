@@ -8,6 +8,7 @@ import { v4 } from "uuid"
 import "dotenv/config"
 import Product from "./models/product.js"
 import mongoosePlugin from "./plugins/mongoosePlugin.js"
+import { getProductCount } from "./contract/services/getProductCount.js"
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -43,6 +44,9 @@ fastify.register(mongoosePlugin, {
   uri: process.env.MONGO_URI,
 });
 
+fastify.register(ethersPlugin, {
+  rpcUrl: process.env.RPC_URL,
+});
 
 fastify.get('/', function (_, reply) {
   reply.send({ hello: 'world' })
@@ -87,9 +91,11 @@ fastify.post(
       const file = new File([image.buffer], v4(), {
         type: image.metadata.mimetype,
       });
-      
-      
+
+      const productCount = await getProductCount(fastify);
+
       const { id, cid } = await pinata.upload.public.file(file).keyvalues(fields);
+
       const product = await Product.create({
         imageId: id,
         imageCid: cid,
@@ -97,8 +103,9 @@ fastify.post(
         email: fields.email,
         price: fields.price,
         description: fields.description,
+        productId: (productCount + 1)
       });
-      
+
       return reply.send({
         success: true,
         id, cid,
