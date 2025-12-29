@@ -44,20 +44,20 @@ export default function CreateProduct({
       if (email) {
         localStorage.setItem("user-email", email);
       }
-      const { id, cid } = response.data;
-      setCID(cid);
+      const { _id: id, imageCid } = response.data.product;
+      setCID(imageCid);
 
       toast.success("Product listed successfully!", {
         id: "create-product",
       });
 
       try {
-        await approveAndCreate(BigInt(price ?? 0), cid);
+        await approveAndCreate(BigInt(price ?? 0), imageCid);
       } catch (error) {
         axios
           .delete("/delete-product", {
             data: {
-              id: id,
+              id,
             },
           })
           .then(() => {

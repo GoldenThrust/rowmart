@@ -1,12 +1,4 @@
 // Shared response schemas
-const successResponse = {
-  type: "object",
-  properties: {
-    success: { type: "boolean" }
-  },
-  required: ["success"]
-};
-
 const productProperties = {
   _id: { type: "string" },
   imageId: { type: "string" },

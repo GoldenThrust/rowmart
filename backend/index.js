@@ -16,7 +16,7 @@ const pinata = new PinataSDK({
 
 const fastify = Fastify({
   logger: {
-    file: "logger.txt",
+    file: "log.txt",
   },
 })
 
