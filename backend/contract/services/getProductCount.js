@@ -1,5 +1,5 @@
 import { Contract } from "ethers";
-import { MarketplaceContractConfig } from "../marketPlace";
+import { MarketplaceContractConfig } from "../marketPlace.js";
 
 export async function getProductCount(fastify) {
   const contract = new Contract(

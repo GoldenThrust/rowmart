@@ -1,10 +1,10 @@
 {
   "_format": "hh3-sol-build-info-1",
-  "id": "solc-0_8_28-f24d7ec5eaa5f33ae4c069bac057d726813ae790",
+  "id": "solc-0_8_28-3d768dbb67cd7824508fad822c0a88818b71ed35",
   "solcVersion": "0.8.28",
   "solcLongVersion": "0.8.28+commit.7893614a",
   "userSourceNameMap": {
-    "contracts/MockERC20.sol": "project/contracts/MockERC20.sol"
+    "contracts/MockMNEE.sol": "project/contracts/MockMNEE.sol"
   },
   "input": {
     "language": "Solidity",
@@ -48,8 +48,8 @@
       "npm/@openzeppelin/contracts@5.4.0/utils/Context.sol": {
         "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Provides information about the current execution context, including the\n * sender of the transaction and its data. While these are generally available\n * via msg.sender and msg.data, they should not be accessed in such a direct\n * manner, since when dealing with meta-transactions the account sending and\n * paying for execution may not be the actual sender (as far as an application\n * is concerned).\n *\n * This contract is only required for intermediate, library-like contracts.\n */\nabstract contract Context {\n    function _msgSender() internal view virtual returns (address) {\n        return msg.sender;\n    }\n\n    function _msgData() internal view virtual returns (bytes calldata) {\n        return msg.data;\n    }\n\n    function _contextSuffixLength() internal view virtual returns (uint256) {\n        return 0;\n    }\n}\n"
       },
-      "project/contracts/MockERC20.sol": {
-        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\nimport \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\r\n\r\ncontract MockERC20 is ERC20 {\r\n    constructor() ERC20(\"Mock MNEE\", \"MNEE\") {\r\n        _mint(msg.sender, 1_000_000 ether);\r\n    }\r\n\r\n    function mint(address to, uint256 amount) external {\r\n        _mint(to, amount);\r\n    }\r\n}"
+      "project/contracts/MockMNEE.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\nimport \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\r\n\r\ncontract MockMNEE is ERC20 {\r\n    constructor() ERC20(\"Mock MNEE\", \"MNEE\") {\r\n        _mint(msg.sender, 1_000_000 ether);\r\n    }\r\n\r\n    function mint(address to, uint256 amount) external {\r\n        _mint(to, amount);\r\n    }\r\n}"
       }
     }
   }

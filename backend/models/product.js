@@ -27,10 +27,12 @@ const productSchema = new Schema({
         required: true
     },
     productId: {
-        type: Number,
+        type: String,
         required: true
     }
 })
 
 const Product = model("Product", productSchema);
+// TODO: price range filter
+
 export default Product;

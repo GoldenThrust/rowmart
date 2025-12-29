@@ -11,7 +11,7 @@ export default function CreateProduct({
   setOpenForm: Dispatch<SetStateAction<boolean>>;
 }) {
   const [userEmail, setUserEmail] = useState<string>("");
-  const [CID, setCID] = useState<string>("");
+  const [_, setCID] = useState<string>("");
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
   const { formatedBalance } = useReadBalance();

@@ -1,7 +1,7 @@
 import fp from "fastify-plugin";
 import { JsonRpcProvider } from "ethers";
 
-export default fp(async function (fastify, opts) {
+const ethersPlugin = fp(async function (fastify, opts) {
     const provider = new JsonRpcProvider(opts.rpcUrl);
 
     // Verify connection
@@ -17,3 +17,5 @@ export default fp(async function (fastify, opts) {
         }
     });
 });
+
+export default ethersPlugin;

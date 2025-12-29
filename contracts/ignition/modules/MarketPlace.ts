@@ -10,8 +10,8 @@ const MarketplaceModule = buildModule("MarketplaceModule", (m) => {
   const buyer = m.getAccount(4);
   const other = m.getAccount(5);
 
-  // Deploy MockERC20
-  const token = m.contract("MockERC20");
+  // Deploy MockMNEE
+  const token = m.contract("MockMNEE");
 
   const amount = ethers.parseEther("1000");
 
