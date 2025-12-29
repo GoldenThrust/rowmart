@@ -6,6 +6,8 @@ const productProperties = {
   name: { type: "string" },
   email: { type: "string" },
   price: { type: "string" },
+  seller: { type: "string" },
+  active: { type: "boolean" },
   description: { type: "string" },
   productId: { type: "string" },
   createdAt: { type: "string" },
@@ -19,10 +21,11 @@ export const createProductSchema = {
   consumes: ["multipart/form-data"],
   body: {
     type: "object",
-    required: ["name", "email", "price", "description"],
+    required: ["name", "email", "seller", "price", "description"],
     properties: {
       name: { type: "string", minLength: 1 },
       email: { type: "string", format: "email" },
+      seller: { type: "string" },
       price: { type: "string" },
       description: { type: "string", minLength: 1 },
       file: {
@@ -95,7 +98,7 @@ export const getProductsSchema = {
   response: {
     200: {
       type: "object",
-      required: ["success", "meta", "data"],
+      required: ["success", "meta", "products"],
       properties: {
         success: { type: "boolean" },
         meta: {
@@ -107,7 +110,7 @@ export const getProductsSchema = {
             totalPages: { type: "integer" }
           }
         },
-        data: {
+        products: {
           type: "array",
           items: {
             type: "object",

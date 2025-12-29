@@ -4,6 +4,8 @@ import { MNEEContractConfig } from "../mnee";
 import { formatUnits } from "viem";
 import { useTokenDetails } from "./useTokenDetails";
 
+
+// TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateProduct() {
   const {
     data: hash,

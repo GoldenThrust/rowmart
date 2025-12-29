@@ -1,13 +1,23 @@
 import { useConnect, useConnection } from "wagmi";
-// import { MarketplaceContractConfig } from "./contracts/marketPlace";
 import CreateProduct from "./components/layout/CreateProducts";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AccountConnectButton } from "./components/ui/ConnectButton";
+import useReadBalance from "./contracts/hooks/useReadBalance";
+import { useWatchTokenTransfers } from "./contracts/hooks/events/TransferEvents";
+import DisplayProducts from "./components/layout/DisplayProducts";
 
 function App() {
+  const { address } = useConnection();
   const { isConnected } = useConnection();
   const { error } = useConnect();
   const [openForm, setOpenForm] = useState<boolean>(false);
+  const readBalance = useReadBalance();
+
+  useWatchTokenTransfers(address, () => {
+    readBalance.refetchBalance();
+    readBalance.refetchEthBalance();
+    console.log("Transfer detected, balances updated.");
+  });
 
   return (
     <>
@@ -16,21 +26,24 @@ function App() {
           RowMart
         </h1>
         {/* <ConnectButton /> */}
-        <AccountConnectButton />
+        <AccountConnectButton readBalance={readBalance} />
 
         {isConnected && (
           <button
             type="button"
             onClick={() => setOpenForm(() => !openForm)}
-           className="p-2 rounded-lg bg-gray-800 font-bold shadow-lg shadow-black border-2 border-neutral-600"
+            className="p-2 rounded-lg bg-gray-800 font-bold shadow-lg shadow-black border-2 border-neutral-600"
           >
-            Create Product
+            Sell Products
           </button>
         )}
       </header>
       <main>
         <div>{error?.message}</div>
-        {openForm && <CreateProduct setOpenForm={setOpenForm} />}
+        {openForm && (
+          <CreateProduct setOpenForm={setOpenForm} readBalance={readBalance} />
+        )}
+        <DisplayProducts />
       </main>
     </>
   );

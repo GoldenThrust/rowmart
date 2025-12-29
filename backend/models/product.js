@@ -6,6 +6,11 @@ const productSchema = new Schema({
         unique: true,
         required: true
     },
+    seller: {
+        type: String,
+        required: true,
+        default: "0x0000000000000000000000000000000000000000"
+    },
     email: {
         type: String,
         required: true
@@ -29,8 +34,12 @@ const productSchema = new Schema({
     productId: {
         type: String,
         required: true
+    },
+    active: {
+        type: Boolean,
+        default: true
     }
-})
+}, { timestamps: true });
 
 const Product = model("Product", productSchema);
 // TODO: price range filter

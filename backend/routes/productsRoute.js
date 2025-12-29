@@ -7,7 +7,8 @@ import { File } from "buffer";
 
 export default async function productRoutes(fastify, opts) {
     const { pinata } = opts;
-
+    // Listen to create Product event and send mail
+    // Delete product after 20 minute of no CreateProduct Events
     // ---------------- CREATE PRODUCT ----------------
     fastify.post(
         "/create-product",
@@ -102,23 +103,25 @@ export default async function productRoutes(fastify, opts) {
             try {
                 const { page = 1, limit = 10, search: searchQuery } = request.query;
 
-                const search = searchQuery ? { $or: [{ name: { $regex: searchQuery, $options: "i" } }, { description: { $regex: searchQuery, $options: "i" } }] } : {};
-                // TODO: price range filter
+                const search = searchQuery ? { $or: [{ name: { $regex: searchQuery, $options: "i" } }, { description: { $regex: searchQuery, $options: "i" } }], active: true } : { active: true };
 
-                const data = await Product.find(search).skip((page - 1) * limit).limit(limit);
+                // TODO: price range filter
+                const products = await Product.find(search).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
+                const total = await Product.countDocuments(search);
 
                 return reply.send({
                     success: true,
                     meta: {
                         total,
-                        page: pageNum,
-                        limit: limitNum,
-                        totalPages: Math.ceil(total / limitNum),
+                        page,
+                        limit,
+                        totalPages: Math.ceil(total / limit),
                     },
-                    data,
+                    products,
                 });
             } catch (err) {
                 request.log.error(err);
+                console.error(err);
                 return reply.status(500).send({ success: false, message: "Failed to get products" });
             }
         }
@@ -151,10 +154,17 @@ export default async function productRoutes(fastify, opts) {
                 const { id } = request.body;
 
                 // Delete from Mongo
-                await Product.findByIdAndDelete(id);
+                const deletedProduct = await Product.findByIdAndDelete(id);
+
+                if (!deletedProduct) {
+                    return reply.status(404).send({
+                        success: false,
+                        message: "Product not found"
+                    });
+                }
 
                 // Delete from Pinata
-                await pinata.files.public.delete([id]);
+                await pinata.files.public.delete([deletedProduct.imageId]);
 
                 return reply.send({ success: true, message: "Product deleted successfully" });
             } catch (err) {

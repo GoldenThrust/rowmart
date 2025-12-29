@@ -4,17 +4,21 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import useCreateProduct from "../../contracts/hooks/useCreateProduct";
 import useReadBalance from "../../contracts/hooks/useReadBalance";
+import { useConnection } from "wagmi";
 
 export default function CreateProduct({
   setOpenForm,
+  readBalance,
 }: {
   setOpenForm: Dispatch<SetStateAction<boolean>>;
+  readBalance: ReturnType<typeof useReadBalance>;
 }) {
+  const { address } = useConnection();
   const [userEmail, setUserEmail] = useState<string>("");
   const [_, setCID] = useState<string>("");
   const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
-  const { formatedBalance } = useReadBalance();
+  const { formatedBalance } = readBalance;
   const [sufficientBalance, setSufficientBalance] = useState<boolean>(true);
 
   useEffect(() => {
@@ -26,6 +30,7 @@ export default function CreateProduct({
       setDisableSubmit(false);
     }
   }, [createProductFee, formatedBalance]);
+
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -35,6 +40,7 @@ export default function CreateProduct({
 
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
+      formData.append("seller", address!.toString());
 
       const response = await axios.post("create-product", formData);
 
@@ -82,7 +88,7 @@ export default function CreateProduct({
   }, [setUserEmail]);
 
   return (
-    <div className="absolute top-0 left-0 w-screen h-screen bg-black/45">
+    <div className="fixed inset-0 w-screen h-screen bg-black/45">
       <X
         className="float-right m-5"
         color="red"

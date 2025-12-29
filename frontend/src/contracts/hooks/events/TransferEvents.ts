@@ -1,6 +1,6 @@
 import { useWatchContractEvent } from "wagmi";
 import { MNEEContractConfig } from "../../mnee";
-
+import { isAddressEqual } from "viem";
 
 export function useWatchTokenTransfers(
   address?: `0x${string}`,
@@ -9,12 +9,24 @@ export function useWatchTokenTransfers(
   useWatchContractEvent({
     ...MNEEContractConfig,
     eventName: "Transfer",
-    args: {
-      to: address?.toLowerCase() as `0x${string}` | undefined,
-      from: address?.toLowerCase() as `0x${string}` | undefined,
-    },
-    onLogs() {
-        onChange?.();
+    enabled: Boolean(address),
+    onLogs(logs) {
+      if (!address) return;
+
+      for (const log of logs) {
+        const { from, to } = log.args as {
+          from: `0x${string}`;
+          to: `0x${string}`;
+        };
+
+        if (
+          isAddressEqual(from, address) ||
+          isAddressEqual(to, address)
+        ) {
+          onChange?.();
+          break;
+        }
+      }
     },
   });
 }

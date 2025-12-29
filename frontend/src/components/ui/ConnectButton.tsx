@@ -2,10 +2,16 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { formatUnits } from "viem";
 import { useTokenDetails } from "../../contracts/hooks/useTokenDetails";
 import { ChevronDown } from "lucide-react";
-import useReadBalance from "../../contracts/hooks/useReadBalance";
 import { useConnection } from "wagmi";
 import { formatNumber } from "../../utils";
-export const AccountConnectButton = () => {
+import useReadBalance from "../../contracts/hooks/useReadBalance";
+
+
+export const AccountConnectButton = ({
+  readBalance,
+}: {
+  readBalance: ReturnType<typeof useReadBalance>;
+}) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -25,7 +31,7 @@ export const AccountConnectButton = () => {
           account &&
           chain &&
           (!authenticationStatus || authenticationStatus === "authenticated");
-        const { balance, formatedBalance, ethBalance } = useReadBalance();
+        const { balance, formatedBalance, ethBalance } = readBalance;
         const icon = useConnection()?.connector?.icon;
         const { symbol } = useTokenDetails();
 
