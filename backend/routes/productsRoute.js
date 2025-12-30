@@ -6,9 +6,9 @@ import { getProductCount } from "../contract/services/getProductCount.js";
 import { File } from "buffer";
 
 export default async function productRoutes(fastify, opts) {
-    const { pinata } = opts;
-    // Listen to create Product event and send mail
-    // Delete product after 20 minute of no CreateProduct Events
+    const { pinata } = fastify;
+    // TODO: Listen to create Product event and send mail
+    // TODO: Delete product after 20 minute of no CreateProduct Events
     // ---------------- CREATE PRODUCT ----------------
     fastify.post(
         "/create-product",
@@ -121,7 +121,6 @@ export default async function productRoutes(fastify, opts) {
                 });
             } catch (err) {
                 request.log.error(err);
-                console.error(err);
                 return reply.status(500).send({ success: false, message: "Failed to get products" });
             }
         }

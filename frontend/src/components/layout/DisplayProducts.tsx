@@ -2,16 +2,22 @@ import axios from "axios";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProductDetails from "../ui/ProductDetails";
+import { useConnection } from "wagmi";
+import toast from "react-hot-toast";
+import useCreateTransaction from "../../contracts/hooks/useCreateTransaction";
 
 export default function DisplayProducts() {
+  const { address } = useConnection();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const { approveAndBuy, isPending } = useCreateTransaction();
+  const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>("");
 
   useEffect(() => {
     axios
       .get("/get-products")
       .then((response) => {
-        console.log("Fetched products:", response.data.products);
         setProducts(response.data.products);
       })
       .catch((error) => {
@@ -19,9 +25,65 @@ export default function DisplayProducts() {
       });
   }, []);
 
-  const buyProduct = (product: any) => {
-    alert(`Buying product: ${product.name} for ${product.price} MNEE`);
+  const buyProduct = async (
+    product: any,
+    quantity: number,
+    sellerEmail: string,
+    price: Number
+  ) => {
+    try {
+      setDisableSubmit(true);
+
+      const response = await axios.post("create-transaction", {
+        productId: product._id,
+        price: product.price,
+        quantity,
+        seller: product.seller,
+        buyer: address,
+        sellerEmail,
+      });
+
+      localStorage.setItem("user-email", sellerEmail);
+
+      const { _id: id, detailsCid } = response.data.transaction;
+
+      toast.success("Product listed successfully!", {
+        id: "create-product",
+      });
+
+      try {
+        await approveAndBuy(
+          BigInt(product.productId!),
+          quantity,
+          detailsCid,
+          BigInt(price.toString())
+        );
+      } catch (error) {
+        axios
+          .delete("/delete-product", {
+            data: {
+              id,
+            },
+          })
+          .then(() => {
+            toast("Product deleted");
+          })
+          .catch(() => {
+            toast("Failed to delete product");
+          });
+      }
+    } catch (error: any) {
+      toast.error(`Error: ${error.response.data.message}`, {
+        id: "create-product",
+      });
+    } finally {
+      setDisableSubmit(false);
+    }
   };
+
+  useEffect(() => {
+    setUserEmail(localStorage.getItem("user-email") ?? "");
+  }, [setUserEmail]);
 
   return (
     // TODO: listen to product creation events and update the products list in real-time
@@ -58,11 +120,17 @@ export default function DisplayProducts() {
       {selectedProduct && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <X
-            className="absolute top-2 right-2  m-5"
+            className="absolute top-4 right-4 cursor-pointer"
             color="red"
             onClick={() => setSelectedProduct(null)}
           />
-          <ProductDetails product={selectedProduct} buyProduct={buyProduct} />
+
+          <ProductDetails
+            product={selectedProduct}
+            buyProduct={buyProduct}
+            disableSubmit={isPending || disableSubmit}
+            defaultEmail={userEmail}
+          />
         </div>
       )}
     </div>

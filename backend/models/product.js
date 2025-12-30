@@ -9,7 +9,6 @@ const productSchema = new Schema({
     seller: {
         type: String,
         required: true,
-        default: "0x0000000000000000000000000000000000000000"
     },
     email: {
         type: String,

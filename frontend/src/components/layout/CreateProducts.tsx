@@ -53,12 +53,12 @@ export default function CreateProduct({
       const { _id: id, imageCid } = response.data.product;
       setCID(imageCid);
 
-      toast.success("Product listed successfully!", {
-        id: "create-product",
-      });
-
+      
       try {
         await approveAndCreate(BigInt(price ?? 0), imageCid);
+        toast.success("Product listed successfully!", {
+          id: "create-product",
+        });
       } catch (error) {
         axios
           .delete("/delete-product", {

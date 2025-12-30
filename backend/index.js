@@ -7,6 +7,7 @@ import "dotenv/config"
 import mongoosePlugin from "./plugins/mongoosePlugin.js"
 import ethersPlugin from "./plugins/ethersPlugin.js"
 import productRoutes from "./routes/productsRoute.js"
+import transactionRoute from "./routes/transactionRoute.js"
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -19,6 +20,8 @@ const fastify = Fastify({
     file: "log.txt",
   },
 })
+
+fastify.decorate("pinata", pinata)
 
 await fastify.register(cors, {
   origin: [process.env.CLIENT_URL],
@@ -46,7 +49,8 @@ fastify.register(ethersPlugin, {
   rpcUrl: process.env.RPC_URL,
 });
 
-fastify.register(productRoutes, { pinata });
+fastify.register(productRoutes);
+fastify.register(transactionRoute);
 
 fastify.get('/', function (_, reply) {
   reply.send({ hello: 'world' })

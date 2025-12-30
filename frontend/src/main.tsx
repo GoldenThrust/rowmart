@@ -10,8 +10,20 @@ import { Toaster } from 'react-hot-toast';
 import axios from "axios";
 import "./index.css";
 
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Error404 } from "./Error404.tsx";
+
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
 const queryClient = new QueryClient();
+
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    errorElement: <Error404 />,
+  }
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -26,7 +38,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             overlayBlur: "small",
           })}
         >
-          <App />
+          <RouterProvider router={router} />
           <Toaster />
         </RainbowKitProvider>
       </QueryClientProvider>

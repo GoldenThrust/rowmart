@@ -1,51 +1,49 @@
+import { productProperties } from "./product.schema.js";
+
 // Shared response schemas
-export const productProperties = {
+const transactionProperties = {
   _id: { type: "string" },
-  imageId: { type: "string" },
-  imageCid: { type: "string" },
-  name: { type: "string" },
-  email: { type: "string" },
-  price: { type: "string" },
+  detailsId: { type: "string" },
+  detailsCid: { type: "string" },
+  product: {
+    type: "object",
+    properties: productProperties,
+  },
+  quantity: { type: "integer" },
+  price: { type: "number" },
+  status: { type: "string" },
+  buyer: { type: "string" },
   seller: { type: "string" },
-  active: { type: "boolean" },
-  description: { type: "string" },
-  productId: { type: "string" },
+  transactionId: { type: "string" },
   createdAt: { type: "string" },
   updatedAt: { type: "string" }
 };
 
 /* -----------------------------------------------------
-   CREATE PRODUCT
+   CREATE TRANSACTION
 ----------------------------------------------------- */
-export const createProductSchema = {
-  consumes: ["multipart/form-data"],
+export const createTransactionSchema = {
   body: {
     type: "object",
-    required: ["name", "email", "seller", "price", "description"],
+    required: ["buyer", "seller", "buyerEmail", "productId", "quantity", "price"],
     properties: {
-      name: { type: "string", minLength: 1 },
-      email: { type: "string", format: "email" },
+      buyer: { type: "string" },
       seller: { type: "string" },
-      price: { type: "string" },
-      description: { type: "string", minLength: 1 },
-      file: {
-        type: "object",
-        properties: {
-          buffer: { type: "object" },
-          metadata: { type: "object" }
-        }
-      }
+      buyerEmail: { type: "string" },
+      productId: { type: "string" },
+      quantity: { type: "integer", minimum: 1 },
+      price: { type: "number" }
     }
   },
   response: {
     200: {
       type: "object",
-      required: ["success", "product"],
+      required: ["success", "transaction"],
       properties: {
         success: { type: "boolean" },
-        product: {
+        transaction: {
           type: "object",
-          properties: productProperties
+          properties: transactionProperties
         }
       }
     }
@@ -53,30 +51,27 @@ export const createProductSchema = {
 };
 
 /* -----------------------------------------------------
-   UPDATE PRODUCT
+   UPDATE TRANSACTION
 ----------------------------------------------------- */
-export const updateProductSchema = {
+export const updateTransactionSchema = {
   body: {
     type: "object",
     required: ["id"],
     additionalProperties: false,
     properties: {
       id: { type: "string" },
-      name: { type: "string" },
-      email: { type: "string", format: "email" },
-      price: { type: "string" },
-      description: { type: "string" }
+      status: { type: "string", enum: ["pending", "disputed", "completed", "refunded"] }
     }
   },
   response: {
     200: {
       type: "object",
-      required: ["success", "product"],
+      required: ["success", "transaction"],
       properties: {
         success: { type: "boolean" },
-        product: {
+        transaction: {
           type: "object",
-          properties: productProperties
+          properties: transactionProperties
         }
       }
     }
@@ -84,21 +79,21 @@ export const updateProductSchema = {
 };
 
 /* -----------------------------------------------------
-   GET PRODUCTS (PAGINATION + SEARCH)
+   GET TRANSACTIONS (PAGINATION + SEARCH)
 ----------------------------------------------------- */
-export const getProductsSchema = {
+export const getTransactionsSchema = {
   querystring: {
     type: "object",
     properties: {
       page: { type: "integer", minimum: 1, default: 1 },
       limit: { type: "integer", minimum: 1, maximum: 100, default: 10 },
-      search: { type: "string" }
+      status: { type: "string", enum: ["pending", "disputed", "completed", "refunded"] }
     }
   },
   response: {
     200: {
       type: "object",
-      required: ["success", "meta", "products"],
+      required: ["success", "meta", "transactions"],
       properties: {
         success: { type: "boolean" },
         meta: {
@@ -110,11 +105,11 @@ export const getProductsSchema = {
             totalPages: { type: "integer" }
           }
         },
-        products: {
+        transactions: {
           type: "array",
           items: {
             type: "object",
-            properties: productProperties
+            properties: transactionProperties
           }
         }
       }
@@ -123,18 +118,18 @@ export const getProductsSchema = {
 };
 
 /* -----------------------------------------------------
-   GET SINGLE PRODUCT
+   GET SINGLE TRANSACTION
 ----------------------------------------------------- */
-export const getProductSchema = {
+export const getTransactionSchema = {
   querystring: {
     type: "object",
     oneOf: [
       { required: ["id"] },
-      { required: ["productId"] }
+      { required: ["transactionId"] }
     ],
     properties: {
       id: { type: "string" },
-      productId: { type: "string" }
+      transactionId: { type: "string" }
     }
   },
   response: {
@@ -145,7 +140,7 @@ export const getProductSchema = {
         success: { type: "boolean" },
         data: {
           type: ["object", "null"],
-          properties: productProperties
+          properties: transactionProperties
         }
       }
     }
@@ -153,9 +148,9 @@ export const getProductSchema = {
 };
 
 /* -----------------------------------------------------
-   DELETE PRODUCT
+   DELETE TRANSACTION
 ----------------------------------------------------- */
-export const deleteProductSchema = {
+export const deleteTransactionSchema = {
   body: {
     type: "object",
     required: ["id"],
