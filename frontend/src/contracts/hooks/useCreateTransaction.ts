@@ -4,6 +4,8 @@ import {
 } from "wagmi";
 import { MarketplaceContractConfig } from "../marketPlace";
 import { MNEEContractConfig } from "../mnee";
+import { useTokenDetails } from "./useTokenDetails";
+import { parseUnits } from "viem";
 
 // TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateTransaction() {
@@ -17,18 +19,19 @@ export default function useCreateTransaction() {
   const { isLoading, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
+  const { decimals = 18 } = useTokenDetails();
 
   const approveAndBuy = async (
     productId: bigint,
     quantity: number,
     metadataCID: string,
-    price: bigint
+    price: string
   ) => {
     // 1️⃣ Approve MNEE
     await writeContractAsync({
       ...MNEEContractConfig,
       functionName: "approve",
-      args: [MarketplaceContractConfig.address, price],
+      args: [MarketplaceContractConfig.address, parseUnits(price, decimals)],
     });
 
     // 2️⃣ Create Transaction

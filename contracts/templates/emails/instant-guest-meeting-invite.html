@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest Invitation - Sync Meeting</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7fa;
+      font-family: Arial, sans-serif;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+
+    .logo {
+      max-width: 140px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #26544f;
+      font-variant: small-caps;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background-color: #45556c;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-top: 1.5rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #374151;
+    }
+
+    .guest-note {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #f0f7ff;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img src="${logoUrl}" alt="Sync Logo" class="logo" />
+    <h1>Guest Meeting Invitation</h1>
+
+    <p>Hello,</p>
+    <p><strong>${inviterName}</strong> has invited you to join a video call on <strong>Sync</strong> as a guest.</p>
+
+    <a href="${meetingLink}" class="btn">Join Meeting as Guest</a>
+
+    <div class="guest-note">
+      <p><strong>Note:</strong> No account is required to join this meeting. Simply click the button above and enter your display name when prompted.</p>
+    </div>
+
+    <p>If the button above doesn't work, you can also use this link:</p>
+    <p><a href="${meetingLink}">${meetingLink}</a></p>
+
+    <footer>
+      <p>Happy connecting,<br />The Sync Team</p>
+    </footer>
+  </div>
+</body>
+</html>

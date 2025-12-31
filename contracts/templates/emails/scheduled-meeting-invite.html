@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scheduled Meeting - Sync Meeting Invitation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7fa;
+      font-family: Arial, sans-serif;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+
+    .logo {
+      max-width: 140px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #273748;
+      font-variant: small-caps;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+
+    .meeting-details {
+      background-color: #f0f4f8;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .meeting-details h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #263954;
+    }
+
+    .detail-item {
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .detail-label {
+      font-weight: bold;
+      width: 100px;
+      color: #45556c;
+      flex-shrink: 0;
+    }
+
+    .calendar-btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #26544f;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .calendar-btn:hover {
+      background-color: #1a3c39;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background-color: #45556c;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-top: 1.5rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #374151;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .btn, .calendar-btn {
+        width: 100%;
+        padding: 1rem;
+      }
+      
+      .detail-item {
+        flex-direction: column;
+      }
+      
+      .detail-label {
+        width: 100%;
+        margin-bottom: 0.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img src="${logoUrl}" alt="Sync Logo" class="logo" />
+    <h1>Scheduled Meeting Invitation</h1>
+
+    <p>Hello ${inviteeName},</p>
+    <p><strong>${inviterName}</strong> has scheduled a meeting and invited you to join.</p>
+
+    <div class="meeting-details">
+      <h2>${meetingTitle}</h2>
+      
+      <div class="detail-item">
+        <span class="detail-label">When:</span>
+        <span>${meetingDate}</span>
+      </div>
+      
+      <div class="detail-item">
+        <span class="detail-label">Duration:</span>
+        <span>${meetingDuration}</span>
+      </div>
+      
+      <div class="detail-item">
+        <span class="detail-label">Host:</span>
+        <span>${inviterName}</span>
+      </div>
+      
+      <a href="#" class="calendar-btn">Add to Calendar</a>
+    </div>
+
+    <a href="${meetingLink}" class="btn">Join Meeting</a>
+
+    <p>You can join the meeting at the scheduled time using the button above,<br>or by copying this link to your browser:</p>
+    <p><a href="${meetingLink}">${meetingLink}</a></p>
+
+    <footer>
+      <p>Happy connecting,<br />The Sync Team</p>
+    </footer>
+  </div>
+</body>
+</html>

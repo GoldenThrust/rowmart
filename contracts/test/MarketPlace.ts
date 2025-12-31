@@ -26,7 +26,7 @@ async function createProduct(
       .createProduct(ethers.parseEther(price.toString()), uri)
   )
     .to.emit(marketplace, "ProductCreated")
-    .withArgs(1, seller.address);
+    .withArgs(1, seller.address, uri);
 
   // Optionally return the productId if needed
   return 1;
@@ -240,6 +240,7 @@ describe("Marketplace (UUPS)", function () {
     );
 
     const quantity = 2;
+    const uri = "ipfs://metadata";
     await createProduct(Token, marketplace, seller);
 
     await Token.connect(buyer).approve(
@@ -248,10 +249,10 @@ describe("Marketplace (UUPS)", function () {
     );
 
     await expect(
-      marketplace.connect(buyer).buyProduct(1, quantity, "ipfs://metadata")
+      marketplace.connect(buyer).buyProduct(1, quantity, uri)
     )
       .to.emit(marketplace, "ProductPurchased")
-      .withArgs(1, 1);
+      .withArgs(1, 1, uri);
 
     const txn = await marketplace.transactions(1);
     expect(txn.buyer).to.equal(buyer.address);

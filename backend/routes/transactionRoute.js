@@ -1,8 +1,10 @@
 import { getTransactionCount } from "../contract/services/getTransactionCount.js";
+import Product from "../models/product.js";
 import Transaction from "../models/transaction.js";
 import { createTransactionSchema, deleteTransactionSchema, getTransactionSchema, getTransactionsSchema, updateTransactionSchema } from "../schemas/transaction.schema.js";
 
-export default async function transactionRoute(fastify, opts) {
+// TODO: listen to transaction events and update status and transactionId accordingly
+export default async function transactionRoute(fastify) {
     const { pinata } = fastify;
     // ---------------- CREATE Transaction ----------------
     fastify.post(
@@ -11,18 +13,23 @@ export default async function transactionRoute(fastify, opts) {
         async (request, reply) => {
             try {
                 const fields = request.body;
-
                 // Read transactionCount from blockchain
                 const transactionCount = await getTransactionCount(fastify);
 
                 // Upload to Pinata
                 const { id, cid } = await pinata.upload.public.json(fields);
 
+                const product = await Product.findById(fields.productId);
+                if (!product) {
+                    return reply.status(404).send({ message: "Product not found" });
+                }
+
                 // Save to MongoDB
                 const transaction = await Transaction.create({
                     ...fields,
-                    imageId: id,
-                    imageCid: cid,
+                    product,
+                    detailsId: id,
+                    detailsCid: cid,
                     transactionId: (transactionCount + 1n).toString(),
                 });
 

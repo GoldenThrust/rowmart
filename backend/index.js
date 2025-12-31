@@ -3,11 +3,11 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { PinataSDK } from "pinata"
 
-import "dotenv/config"
 import mongoosePlugin from "./plugins/mongoosePlugin.js"
 import ethersPlugin from "./plugins/ethersPlugin.js"
 import productRoutes from "./routes/productsRoute.js"
 import transactionRoute from "./routes/transactionRoute.js"
+import MailService from "./services/mailService.js"
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -39,6 +39,22 @@ await fastify.register(import('@fastify/multipart'), {
   limits: {
     fileSize: 1024 * 1024, // 1MB
   },
+})
+
+fastify.register(import('fastify-mailer'), {
+  defaults: { from: 'John Doe <mailer@rowmart.com>' },
+  transport: {
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: false, // use TLS
+    // auth: {
+    //   user: process.env.MAIL_USERNAME,
+    //   pass: process.env.MAIL_PASSWORD,
+    // },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  }
 })
 
 fastify.register(mongoosePlugin, {

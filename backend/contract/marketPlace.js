@@ -1,4 +1,6 @@
-export const MarketplaceContractConfig = ["0x5FbDB2315678afecb367f032d93F642f64180aa3", [
+import "dotenv/config";
+
+export const MarketplaceContractConfig = [process.env.MARKETPLACE_ADDRESS, [
   {
     "inputs": [
       {
@@ -226,6 +228,12 @@ export const MarketplaceContractConfig = ["0x5FbDB2315678afecb367f032d93F642f641
         "internalType": "address",
         "name": "seller",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "uri",
+        "type": "string"
       }
     ],
     "name": "ProductCreated",
@@ -264,6 +272,12 @@ export const MarketplaceContractConfig = ["0x5FbDB2315678afecb367f032d93F642f641
         "internalType": "uint256",
         "name": "txnId",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "uri",
+        "type": "string"
       }
     ],
     "name": "ProductPurchased",
@@ -945,5 +959,5 @@ export const MarketplaceContractConfig = ["0x5FbDB2315678afecb367f032d93F642f641
     "stateMutability": "payable",
     "type": "function"
   }
-],
+]
 ]

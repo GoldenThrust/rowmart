@@ -5,6 +5,8 @@ import Product from "../models/product.js";
 import { getProductCount } from "../contract/services/getProductCount.js";
 import { File } from "buffer";
 
+// TODO: listen to product events and update status and productId accordingly
+// TODO: delete product that are not on chain. 
 export default async function productRoutes(fastify, opts) {
     const { pinata } = fastify;
     // TODO: Listen to create Product event and send mail
@@ -61,17 +63,15 @@ export default async function productRoutes(fastify, opts) {
 
                 // Save to MongoDB
                 const product = await Product.create({
+                    ...fields,
                     imageId: id,
                     imageCid: cid,
-                    name: fields.name,
-                    email: fields.email,
-                    price: fields.price,
-                    description: fields.description,
                     productId: (productCount + 1n).toString(),
                 });
 
                 return reply.send({ success: true, product });
             } catch (err) {
+                console.error(err);
                 request.log.error(err);
                 return reply.status(500).send({ message: "Upload failed" });
             }

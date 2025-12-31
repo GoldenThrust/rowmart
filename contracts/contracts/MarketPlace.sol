@@ -69,8 +69,8 @@ contract Marketplace is
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event ProductCreated(uint256 indexed productId, address indexed seller);
-    event ProductPurchased(uint256 indexed productId, uint256 indexed txnId);
+    event ProductCreated(uint256 indexed productId, address indexed seller, string uri);
+    event ProductPurchased(uint256 indexed productId, uint256 indexed txnId, string uri);
     event ProductStatusUpdated(uint256 indexed productId, bool active);
     event ProductPriceUpdated(uint256 indexed productId, uint96 price);
 
@@ -185,7 +185,7 @@ contract Marketplace is
             metadataURI: uri
         });
 
-        emit ProductCreated(productCount, msg.sender);
+        emit ProductCreated(productCount, msg.sender, uri);
         return productCount;
     }
 
@@ -213,6 +213,7 @@ contract Marketplace is
         uint8 quantity,
         string calldata uri
     ) external nonReentrant {
+        require(productId > 0 && productId <= productCount, "Invalid product ID");
         Product storage p = products[productId];
         require(p.active, "Product inactive");
         require(p.seller != msg.sender, "Seller cannot buy");
@@ -242,7 +243,7 @@ contract Marketplace is
 
         hasPurchased[productId][msg.sender] = true;
 
-        emit ProductPurchased(productId, transactionCount);
+        emit ProductPurchased(productId, transactionCount, uri);
     }
 
     function confirmDelivery(uint256 txnId) external nonReentrant {

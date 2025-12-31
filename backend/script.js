@@ -29,7 +29,6 @@ mongoose.connect("mongodb://0.0.0.0:27017/rowmart", {
             console.error(`Failed to update product ${product.productId}:`, err);
         }
     });
-    console.log(products.length);
 }).catch((err) => {
     console.error(err);
     process.exit(1);

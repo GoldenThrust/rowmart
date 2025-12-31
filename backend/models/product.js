@@ -24,10 +24,12 @@ const productSchema = new Schema({
     },
     imageId: {
         type: String,
+        unique: true,
         required: true
     },
     imageCid: {
         type: String,
+        unique: true,
         required: true
     },
     productId: {

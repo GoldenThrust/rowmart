@@ -6,7 +6,7 @@ import { useConnection } from "wagmi";
 import toast from "react-hot-toast";
 import useCreateTransaction from "../../contracts/hooks/useCreateTransaction";
 
-export default function DisplayProducts() {
+export default function DisplayProducts({ query }: { query: string | null }) {
   const { address } = useConnection();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
@@ -16,23 +16,28 @@ export default function DisplayProducts() {
 
   useEffect(() => {
     axios
-      .get("/get-products")
+      .get(query ? `/get-products?search=${query}` : `/get-products`)
       .then((response) => {
         setProducts(response.data.products);
       })
       .catch((error) => {
         console.error("Error fetching products:", error);
       });
-  }, []);
+  }, [query]);
 
   const buyProduct = async (
     product: any,
     quantity: number,
-    sellerEmail: string,
+    buyerEmail: string,
     price: Number
   ) => {
     try {
       setDisableSubmit(true);
+
+      console.log("Creating transaction...");
+      console.log(buyerEmail);
+
+      toast.loading("Processing Transaction...", { id: "create-product" });
 
       const response = await axios.post("create-transaction", {
         productId: product._id,
@@ -40,10 +45,10 @@ export default function DisplayProducts() {
         quantity,
         seller: product.seller,
         buyer: address,
-        sellerEmail,
+        buyerEmail,
       });
 
-      localStorage.setItem("user-email", sellerEmail);
+      localStorage.setItem("user-email", buyerEmail);
 
       const { _id: id, detailsCid } = response.data.transaction;
 
@@ -52,21 +57,25 @@ export default function DisplayProducts() {
       });
 
       try {
+        if (!product.productId || Number(product.productId) <= 0) {
+          throw new Error("Invalid productId");
+        }
+
         await approveAndBuy(
           BigInt(product.productId!),
           quantity,
           detailsCid,
-          BigInt(price.toString())
+          price.toString()
         );
       } catch (error) {
         axios
-          .delete("/delete-product", {
+          .delete("/delete-transaction", {
             data: {
               id,
             },
           })
           .then(() => {
-            toast("Product deleted");
+            toast("Transaction Canceled");
           })
           .catch(() => {
             toast("Failed to delete product");
@@ -90,32 +99,38 @@ export default function DisplayProducts() {
     // TODO: click to show products details
     <div>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-        {products.map((product: any) => (
-          <div
-            key={product._id}
-            className="border p-4 rounded-lg shadow-lg"
-            onClick={() => setSelectedProduct(product)}
-          >
-            <img
-              src={`https://ipfs.io/ipfs/${product.imageCid}`}
-              alt={product.name}
-              className="w-full h-48 object-cover rounded-lg"
-            />
-            {/* TODO: display amount of products sold successfully by user to build trust and also user rating */}
-            <div className="mt-4 flex flex-row justify-between items-center">
-              <span>
-                <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
-                <p className="text-gray-500">{product.price} MNEE</p>
-              </span>
-              <span>
-                <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg">
-                  Buy
-                </button>
-              </span>
+        {products.length > 0 ? (
+          products.map((product: any) => (
+            <div
+              key={product._id}
+              className="border p-4 rounded-lg shadow-lg"
+              onClick={() => setSelectedProduct(product)}
+            >
+              <img
+                src={`https://ipfs.io/ipfs/${product.imageCid}`}
+                alt={product.name}
+                className="w-full h-48 object-cover rounded-lg"
+              />
+              {/* TODO: display amount of products sold successfully by user to build trust and also user rating */}
+              <div className="mt-4 flex flex-row justify-between items-center">
+                <span>
+                  <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
+                  <p className="text-gray-500">{product.price} MNEE</p>
+                </span>
+                <span>
+                  <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg">
+                    Buy
+                  </button>
+                </span>
+              </div>
             </div>
+            // TODO: add pagination and search products
+          ))
+        ) : (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500">
+            There is no product on this page yet. Checkback later.
           </div>
-          // TODO: add pagination and search products
-        ))}
+        )}
       </div>
       {selectedProduct && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">

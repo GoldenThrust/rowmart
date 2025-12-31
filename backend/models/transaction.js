@@ -32,10 +32,12 @@ const transactionSchema = new Schema({
     },
     detailsId: {
         type: String,
+        unique: true,
         required: true
     },
     detailsCid: {
         type: String,
+        unique: true,
         required: true
     },
     status: {
