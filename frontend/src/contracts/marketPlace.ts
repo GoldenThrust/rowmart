@@ -1,5 +1,5 @@
 export const MarketplaceContractConfig = {
-  address: import.meta.env.MARKETPLACE_ADDRESS as `0x${string}`,
+  address: import.meta.env.VITE_MARKETPLACE_ADDRESS as `0x${string}`,
   abi: [
     {
       inputs: [

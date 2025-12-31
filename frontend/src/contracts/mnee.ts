@@ -1,5 +1,5 @@
 export const MNEEContractConfig = {
-  address: import.meta.env.MNEE_ADDRESS as `0x${string}`,
+  address: import.meta.env.VITE_MNEE_ADDRESS as `0x${string}`,
   abi: [
     {
       inputs: [],
