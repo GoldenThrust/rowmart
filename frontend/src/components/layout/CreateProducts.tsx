@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { X, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import useCreateProduct from "../../contracts/hooks/useCreateProduct";
@@ -7,135 +7,175 @@ import useReadBalance from "../../contracts/hooks/useReadBalance";
 import { useConnection } from "wagmi";
 
 export default function CreateProduct({
-  setOpenForm,
+  setOpenListingForm,
   readBalance,
 }: {
-  setOpenForm: Dispatch<SetStateAction<boolean>>;
+  setOpenListingForm: Dispatch<SetStateAction<boolean>>;
   readBalance: ReturnType<typeof useReadBalance>;
 }) {
   const { address } = useConnection();
-  const [userEmail, setUserEmail] = useState<string>("");
-  const [_, setCID] = useState<string>("");
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
+
+  const [userEmail, setUserEmail] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
   const { formatedBalance } = readBalance;
-  const [sufficientBalance, setSufficientBalance] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (createProductFee > formatedBalance + 1) {
-      setSufficientBalance(false);
-      setDisableSubmit(true);
-    } else {
-      setSufficientBalance(true);
-      setDisableSubmit(false);
-    }
-  }, [createProductFee, formatedBalance]);
-
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    try {
-      setDisableSubmit(true);
-      toast.loading("Listing Product...", { id: "create-product" });
-
-      const form = e.target as HTMLFormElement;
-      const formData = new FormData(form);
-      formData.append("seller", address!.toString());
-
-      const response = await axios.post("create-product", formData);
-
-      const email = formData.get("email") as string | null;
-      const price = formData.get("price") as number | null;
-
-      if (email) {
-        localStorage.setItem("user-email", email);
-      }
-      const { _id: id, imageCid } = response.data.product;
-      setCID(imageCid);
-
-      
-      try {
-        await approveAndCreate(price!.toString(), imageCid);
-        toast.success("Product listed successfully!", {
-          id: "create-product",
-        });
-      } catch (error) {
-        axios
-          .delete("/delete-product", {
-            data: {
-              id,
-            },
-          })
-
-          toast.error(`Error: ${(error as any).message}`, {
-            id: "create-product",
-          });
-      }
-    } catch (error: any) {
-      toast.error(`Error: ${error.response.data.message}`, {
-        id: "create-product",
-      });
-    } finally {
-      setDisableSubmit(false);
-      setOpenForm(false);
-    }
-  }
+  const sufficientBalance = useMemo(
+    () => createProductFee <= formatedBalance,
+    [createProductFee, formatedBalance]
+  );
 
   useEffect(() => {
     setUserEmail(localStorage.getItem("user-email") ?? "");
-  }, [setUserEmail]);
+  }, []);
+
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!address) return toast.error("Wallet not connected");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const price = formData.get("price")?.toString();
+
+    try {
+      setSubmitting(true);
+      toast.loading("Listing product…", { id: "create-product" });
+
+      formData.append("seller", address);
+
+      const res = await axios.post("/create-product", formData);
+      const { _id, imageCid } = res.data.product;
+
+      localStorage.setItem("user-email", formData.get("email") as string);
+
+      try {
+        await approveAndCreate(price!, imageCid);
+        toast.success("Product listed successfully!", {
+          id: "create-product",
+        });
+        setOpenListingForm(false);
+      } catch (err: any) {
+        await axios.delete("/delete-product", { data: { id: _id } });
+        throw err;
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Listing failed", {
+        id: "create-product",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-black/45">
-      <X
-        className="float-right m-5"
-        color="red"
-        onClick={() => setOpenForm(false)}
-      />
-      <form
-        onSubmit={submit}
-        encType="multipart/form-data"
-        className="absolute-center bg-neutral-950 flex flex-col gap-10 p-10 rounded-2xl *:border-2 *:border-neutral-800 *:p-3 *:rounded-lg"
-      >
-        <input type="text" name="name" placeholder="Product name" required />
-        <input
-          type="number"
-          name="price"
-          placeholder="Product price (MNEE token)"
-          required
-        />
-        <input type="file" name="image" accept=".jpg,.jpeg,.png" required />
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter your email for notification"
-          defaultValue={userEmail}
-          required
-        />
-        <input
-          type="text"
-          name="description"
-          placeholder="short description"
-          required
-        />
-        <button
-          type="submit"
-          disabled={disableSubmit}
-          className={`${sufficientBalance ? "bg-gray-900" : "bg-red-500"} cursor-pointer font-bold`}
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="relative w-full max-w-md bg-neutral-950 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 sticky top-0 bg-neutral-950 z-10">
+          <h2 className="text-lg font-semibold text-white">List New Product</h2>
+          <X
+            onClick={() => setOpenListingForm(false)}
+            className="cursor-pointer text-gray-400 hover:text-red-500"
+          />
+        </div>
+
+        {/* Scrollable Body */}
+        <form
+          onSubmit={submit}
+          encType="multipart/form-data"
+          className="flex-1 overflow-y-auto p-6 space-y-4"
         >
-          {sufficientBalance
-            ? isPending || disableSubmit
-              ? "Listing....."
-              : "List Product"
-            : "Insufficient Balance"}
-        </button>
-      </form>
-      <div
-        className={`absolute bottom-10 left-1/2 -translate-1/2 ${sufficientBalance ? "text-green-400" : "text-red-500"} font-bold`}
-      >
-        {sufficientBalance
-          ? `You will have to pay ${createProductFee} MNEE to create a product.`
-          : `Insufficient balance: ${createProductFee} MNEE required. Fund your MNEE account and retry`}
+          <input
+            name="name"
+            placeholder="Product name"
+            required
+            className="input-field"
+          />
+
+          <input
+            name="price"
+            type="number"
+            min="0"
+            step="any"
+            placeholder="Price (MNEE)"
+            required
+            className="input-field"
+          />
+
+          {/* Image Upload */}
+          <label className="group flex flex-col items-center justify-center gap-2 border border-dashed border-neutral-700 rounded-xl p-4 cursor-pointer hover:border-emerald-500 transition">
+            <Upload className="text-gray-400 group-hover:text-emerald-400" />
+            <span className="text-sm text-gray-400">
+              Upload product image
+            </span>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              hidden
+              required
+              onChange={(e) =>
+                setImagePreview(
+                  e.target.files
+                    ? URL.createObjectURL(e.target.files[0])
+                    : null
+                )
+              }
+            />
+          </label>
+
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="rounded-xl max-h-40 object-cover"
+            />
+          )}
+
+          <input
+            name="email"
+            type="email"
+            defaultValue={userEmail}
+            placeholder="Email for notifications"
+            required
+            className="input-field"
+          />
+
+          <textarea
+            name="description"
+            placeholder="Short product description"
+            required
+            className="input-field h-24 resize-none"
+          />
+
+          {/* Fee Info */}
+          <div
+            className={`rounded-xl px-4 py-3 text-sm font-medium ${
+              sufficientBalance
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-red-500/10 text-red-400"
+            }`}
+          >
+            {sufficientBalance
+              ? `Listing fee: ${createProductFee} MNEE`
+              : `Insufficient balance — ${createProductFee} MNEE required`}
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={!sufficientBalance || submitting || isPending}
+            className={`w-full rounded-xl py-3 font-semibold transition ${
+              sufficientBalance
+                ? "bg-emerald-500 text-black hover:bg-emerald-400"
+                : "bg-red-600 text-white cursor-not-allowed"
+            }`}
+          >
+            {submitting || isPending ? "Listing…" : "List Product"}
+          </button>
+        </form>
       </div>
     </div>
   );

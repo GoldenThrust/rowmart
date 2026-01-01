@@ -84,10 +84,12 @@ export const updateTransactionSchema = {
 export const getTransactionsSchema = {
   querystring: {
     type: "object",
+    required: ['address'],
     properties: {
       page: { type: "integer", minimum: 1, default: 1 },
       limit: { type: "integer", minimum: 1, maximum: 100, default: 10 },
-      status: { type: "string", enum: ["pending", "disputed", "completed", "refunded"] }
+      status: { type: "string", enum: ["pending", "disputed", "completed", "refunded"] },
+      isSeller: { type: "boolean" }
     }
   },
   response: {

@@ -1,11 +1,12 @@
 import axios from "axios";
-import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProductDetails from "../ui/ProductDetails";
 import { useConnection } from "wagmi";
 import toast from "react-hot-toast";
 import useCreateTransaction from "../../contracts/hooks/useCreateTransaction";
 import useReadBalance from "../../contracts/hooks/useReadBalance";
+
+/* --------------------------- Component --------------------------- */
 
 export default function DisplayProducts({
   query,
@@ -15,38 +16,37 @@ export default function DisplayProducts({
   readBalance: ReturnType<typeof useReadBalance>;
 }) {
   const { address } = useConnection();
-  const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [disableSubmit, setDisableSubmit] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
   const { approveAndBuy, isPending } = useCreateTransaction();
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(false);
-  const [userEmail, setUserEmail] = useState<string>("");
+
+  /* ------------------------- Fetch Products ------------------------ */
 
   useEffect(() => {
     axios
       .get(query ? `/get-products?search=${query}` : `/get-products`)
-      .then((response) => {
-        setProducts(response.data.products);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
+      .then((res) => setProducts(res.data.products))
+      .catch((err) => console.error("Error fetching products:", err));
   }, [query]);
 
+  /* --------------------------- Buy Flow --------------------------- */
+
   const buyProduct = async (
-    product: any,
+    product: Product,
     quantity: number,
     buyerEmail: string,
-    price: Number
+    price: number
   ) => {
     try {
       setDisableSubmit(true);
 
-      console.log("Creating transaction...");
-      console.log(buyerEmail);
+      toast.loading("Processing transaction…", { id: "buy-product" });
 
-      toast.loading("Processing Transaction...", { id: "buy-product" });
-
-      const response = await axios.post("create-transaction", {
+      const res = await axios.post("/create-transaction", {
         productId: product._id,
         price: product.price,
         quantity,
@@ -57,7 +57,7 @@ export default function DisplayProducts({
 
       localStorage.setItem("user-email", buyerEmail);
 
-      const { _id: id, detailsCid } = response.data.transaction;
+      const { _id, detailsCid } = res.data.transaction;
 
       try {
         if (!product.productId || Number(product.productId) <= 0) {
@@ -65,7 +65,7 @@ export default function DisplayProducts({
         }
 
         await approveAndBuy(
-          BigInt(product.productId!),
+          BigInt(product.productId),
           quantity,
           detailsCid,
           price.toString()
@@ -73,22 +73,19 @@ export default function DisplayProducts({
 
         readBalance.refetchBalance();
         readBalance.refetchEthBalance();
-        toast.success("Product bought successfully!", {
-          id: "buy-product",
-        });
-      } catch (error) {
-        axios.delete("/delete-transaction", {
-          data: {
-            id,
-          },
+
+        toast.success("Purchase successful", { id: "buy-product" });
+      } catch (err) {
+        await axios.delete("/delete-transaction", {
+          data: { id: _id },
         });
 
-        toast.error(`Error: ${(error as any).name}`, {
+        toast.error("Blockchain transaction failed", {
           id: "buy-product",
         });
       }
-    } catch (error: any) {
-      toast.error(`Error: ${error.response.data.message}`, {
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Transaction failed", {
         id: "buy-product",
       });
     } finally {
@@ -97,63 +94,73 @@ export default function DisplayProducts({
     }
   };
 
+  /* ----------------------- Persist Email -------------------------- */
+
   useEffect(() => {
     setUserEmail(localStorage.getItem("user-email") ?? "");
-  }, [setUserEmail]);
+  }, []);
+
+  /* ----------------------------- UI ------------------------------ */
 
   return (
-    // TODO: listen to product creation events and update the products list in real-time
-    // TODO: click to show products details
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+    <div className="relative">
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
         {products.length > 0 ? (
-          products.map((product: any) => (
+          products.map((product) => (
             <div
               key={product._id}
-              className="border p-4 rounded-lg shadow-lg"
-              onClick={() => setSelectedProduct(product)}
+              className="group bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden hover:border-neutral-600 hover:shadow-xl transition cursor-pointer"
             >
-              <img
-                src={`https://ipfs.io/ipfs/${product.imageCid}`}
-                alt={product.name}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-              {/* TODO: display amount of products sold successfully by user to build trust and also user rating */}
-              <div className="mt-4 flex flex-row justify-between items-center">
-                <span>
-                  <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
-                  <p className="text-gray-500">{product.price} MNEE</p>
-                </span>
-                <span>
-                  <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg">
-                    Buy
-                  </button>
-                </span>
+              {/* Image */}
+              <div
+                className="relative h-48 overflow-hidden"
+                onClick={() => setSelectedProduct(product)}
+              >
+                <img
+                  src={`https://ipfs.io/ipfs/${product.imageCid}`}
+                  alt={product.name}
+                  className="h-full w-full object-cover group-hover:scale-105 transition"
+                />
+              </div>
+
+              {/* Content */}
+              <div className="p-4 flex flex-col gap-3">
+                <div>
+                  <h3 className="font-medium text-sm truncate">
+                    {product.name}
+                  </h3>
+                  <p className="text-xs text-neutral-400">
+                    {product.price} MNEE
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setSelectedProduct(product)}
+                  className="mt-auto bg-emerald-600 hover:bg-emerald-500 text-xs py-2 rounded-lg transition"
+                >
+                  Buy Now
+                </button>
               </div>
             </div>
-            // TODO: add pagination and search products
           ))
         ) : (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500">
-            There is no product on this page yet. Checkback later.
+          <div className="col-span-full flex flex-col items-center justify-center text-neutral-500 h-[40vh]">
+            <p>No products available</p>
+            <p className="text-xs mt-1">Check back later</p>
           </div>
         )}
       </div>
-      {selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <X
-            className="absolute top-4 right-4 cursor-pointer"
-            color="red"
-            onClick={() => setSelectedProduct(null)}
-          />
 
-          <ProductDetails
-            product={selectedProduct}
-            buyProduct={buyProduct}
-            disableSubmit={isPending || disableSubmit}
-            defaultEmail={userEmail}
-          />
-        </div>
+      {/* Product Modal */}
+      {selectedProduct && (
+        <ProductDetails
+          setSelectedProduct={setSelectedProduct}
+          product={selectedProduct}
+          buyProduct={buyProduct}
+          disableSubmit={isPending || disableSubmit}
+          defaultEmail={userEmail}
+        />
       )}
     </div>
   );

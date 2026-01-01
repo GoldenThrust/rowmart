@@ -64,27 +64,56 @@ export default async function transactionRoute(fastify) {
         { schema: getTransactionsSchema },
         async (request, reply) => {
             try {
-                const { page = 1, limit = 10, status } = request.query;
+                const {
+                    page = 1,
+                    limit = 10,
+                    address,
+                    status,
+                    isSeller,
+                } = request.query;
 
-                // TODO: price range filter
-                const transactions = await Transaction.find(status ? {
-                    status
-                } : {}).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
-                const total = await Transaction.countDocuments(status ? { status } : {});
+                const pageNum = Number(page);
+                const limitNum = Number(limit);
+
+                const query = {};
+
+                if (status) {
+                    query.status = status;
+                }
+
+                if (address) {
+                    if (isSeller === true || isSeller === "true") {
+                        query.seller = address;
+                    } else if (isSeller === false || isSeller === "false") {
+                        query.buyer = address;
+                    } else {
+                        query.$or = [{ seller: address }, { buyer: address }];
+                    }
+                }
+
+                const [transactions, total] = await Promise.all([
+                    Transaction.find(query)
+                        .skip((pageNum - 1) * limitNum)
+                        .limit(limitNum)
+                        .sort({ createdAt: -1 }).populate('product'),
+                    Transaction.countDocuments(query),
+                ]);
 
                 return reply.send({
                     success: true,
                     meta: {
                         total,
-                        page,
-                        limit,
-                        totalPages: Math.ceil(total / limit),
+                        page: pageNum,
+                        limit: limitNum,
+                        totalPages: Math.ceil(total / limitNum),
                     },
                     transactions,
                 });
             } catch (err) {
                 request.log.error(err);
-                return reply.status(500).send({ success: false, message: "Failed to get transactions" });
+                return reply
+                    .status(500)
+                    .send({ success: false, message: "Failed to get transactions" });
             }
         }
     );

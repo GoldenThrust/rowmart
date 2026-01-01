@@ -1,18 +1,25 @@
 import { useConnect, useConnection } from "wagmi";
-import CreateProduct from "./components/layout/CreateProducts";
 import { useState } from "react";
+
+import CreateProduct from "./components/layout/CreateProducts";
+import DisplayProducts from "./components/layout/DisplayProducts";
+import Orders from "./components/layout/Orders";
 import { AccountConnectButton } from "./components/ui/ConnectButton";
+
 import useReadBalance from "./contracts/hooks/useReadBalance";
 import { useWatchTokenTransfers } from "./contracts/hooks/events/TransferEvents";
-import DisplayProducts from "./components/layout/DisplayProducts";
 
 function App() {
-  const { address } = useConnection();
-  const { isConnected } = useConnection();
+  const { address, isConnected } = useConnection();
   const { error } = useConnect();
-  const [openForm, setOpenForm] = useState<boolean>(false);
+
+  const [openListingForm, setOpenListingForm] = useState(false);
+  const [openOrderOverlay, setOpenOrderOverlay] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
+
   const readBalance = useReadBalance();
+
+  /* ----------------------- Watch Transfers ----------------------- */
 
   useWatchTokenTransfers(address, () => {
     readBalance.refetchBalance();
@@ -20,44 +27,85 @@ function App() {
     console.log("Transfer detected, balances updated.");
   });
 
-  return (
-    <>
-      <header className="flex justify-between items-center p-4">
-        <h1 className="text-2xl font-bold font-serif text-gray-900 text-shadow-sm text-shadow-blue-800 w-10 flex items-center gap-2">
-          <img src="logo.png" alt="logo" />
-          RowMart
-        </h1>
-        <div className="flex gap-5 items-center">
-          <input
-            type="search"
-            name="query"
-            id="query"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for what you like to buy......."
-            className="border-2 rounded-lg w-98 border-gray-700 outline-0 p-2"
-          />
-          {/* <ConnectButton /> */}
-          <AccountConnectButton readBalance={readBalance} />
+  /* ----------------------------- UI ------------------------------ */
 
-          {isConnected && (
+  return (
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <img src="logo.png" alt="RowMart" className="w-8 h-8" />
+            <h1 className="text-xl font-semibold tracking-tight">
+              RowMart
+            </h1>
+          </div>
+
+          {/* Search */}
+          <div className="flex-1 max-w-xl mx-8">
+            <input
+              type="search"
+              placeholder="Search products, collections, creators…"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2 text-sm placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-4">
             <button
-              type="button"
-              onClick={() => setOpenForm(() => !openForm)}
-              className="p-2 rounded-lg bg-gray-800 font-bold shadow-lg shadow-black border-2 border-neutral-600"
+              onClick={() => setOpenOrderOverlay(true)}
+              className="text-sm px-4 py-2 rounded-lg border border-neutral-800 hover:border-neutral-600 transition"
             >
-              Sell Products
+              Orders
             </button>
-          )}
+
+            <AccountConnectButton readBalance={readBalance} />
+
+            {isConnected && (
+              <button
+                onClick={() => setOpenListingForm(true)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-sm px-4 py-2 rounded-lg font-medium transition"
+              >
+                Sell Product
+              </button>
+            )}
+          </div>
         </div>
       </header>
-      <main>
-        <div>{error?.message}</div>
-        {openForm && (
-          <CreateProduct setOpenForm={setOpenForm} readBalance={readBalance} />
+
+      {/* Error */}
+      {error && (
+        <div className="max-w-7xl mx-auto px-6 pt-4">
+          <div className="bg-red-600/20 border border-red-600/40 text-red-400 text-sm px-4 py-2 rounded-lg">
+            {error.message}
+          </div>
+        </div>
+      )}
+
+      {/* Main */}
+      <main className="max-w-7xl mx-auto">
+        {/* Create Product Modal */}
+        {openListingForm && (
+          <CreateProduct
+            setOpenListingForm={setOpenListingForm}
+            readBalance={readBalance}
+          />
         )}
-        <DisplayProducts query={searchQuery} readBalance={readBalance} />
+
+        {/* Orders Overlay */}
+        {openOrderOverlay && (
+          <Orders setOpenOrderOverlay={setOpenOrderOverlay} />
+        )}
+
+        {/* Products */}
+        <DisplayProducts
+          query={searchQuery}
+          readBalance={readBalance}
+        />
       </main>
-    </>
+    </div>
   );
 }
 
