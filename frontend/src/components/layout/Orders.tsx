@@ -2,34 +2,11 @@ import axios from "axios";
 import { X } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useConnection } from "wagmi";
+import useConfirmDelivery from "../../contracts/hooks/useConfirmDelivery";
+import toast from "react-hot-toast";
 
-/* ----------------------------- Types ----------------------------- */
-
-type OrderStatus = "all" | "pending" | "completed" | "refunded" | "disputed";
-
-type Product = {
-  name: string;
-  description: string;
-  imageCid: string;
-  price: string;
-  seller: string;
-};
-
-type Order = {
-  _id: string;
-  buyer: string;
-  seller: string;
-  quantity: number;
-  price: number;
-  status: OrderStatus;
-  transactionId: string;
-  createdAt: string;
-  updatedAt: string;
-  product: Product;
-};
-
+// TODO: Add Pagination
 /* ---------------------------- Helpers ---------------------------- */
-
 const shortAddress = (addr?: string) =>
   addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
 
@@ -60,7 +37,57 @@ export default function Orders({
   const [isSeller, setIsSeller] = useState<boolean | null>(null);
   const [status, setStatus] = useState<OrderStatus>("all");
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [confirmingId, setConfirmingId] = useState<string>("");
+  const { confirmDelivery } = useConfirmDelivery();
+
+  /* ---------------------- Confirm Delivery ----------------------- */
+  async function submit(order: Order) {
+    if (!address) return;
+    if (order.buyer !== address) return;
+    if (order.status !== "pending") return;
+
+    const confirmed = confirm("Confirm you have received this product?");
+    if (!confirmed) return;
+
+    try {
+      toast.loading("Confirming delivery......", {
+        id: "delivery-confirmation",
+      });
+      await axios.put("/update-transaction", {
+        id: order._id,
+        status: "completed",
+      });
+
+      try {
+        setConfirmingId(order._id);
+        await confirmDelivery(order.transactionId);
+
+        setOrders((prev) =>
+          prev.map((o) =>
+            o._id === order._id ? { ...o, status: "completed" } : o
+          )
+        );
+
+        toast.success("Delivery confirmed", {
+          id: "delivery-confirmation",
+        });
+      } catch (err) {
+        await axios.put("/update-transactions", {
+          id: order._id,
+          status: "pending",
+        });
+        throw err;
+      }
+    } catch (err) {
+      console.error("Confirm delivery failed", err);
+      toast.error("Delivery confirmation failed", {
+        id: "delivery-confirmation",
+      });
+    } finally {
+      setConfirmingId("");
+    }
+  }
 
   /* ------------------------- Fetch Orders ------------------------ */
 
@@ -145,7 +172,7 @@ export default function Orders({
                   : "border-neutral-700"
               }`}
             >
-              Buy
+              Bought
             </button>
             <button
               onClick={() => setIsSeller(true)}
@@ -155,7 +182,7 @@ export default function Orders({
                   : "border-neutral-700"
               }`}
             >
-              Sell
+              Sold
             </button>
           </div>
         </div>
@@ -191,9 +218,7 @@ export default function Orders({
                   {/* Header */}
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-medium">
-                        {order.product.name}
-                      </p>
+                      <p className="font-medium">{order.product.name}</p>
                       <p className="text-xs text-neutral-400 line-clamp-1">
                         {order.product.description}
                       </p>
@@ -220,23 +245,38 @@ export default function Orders({
 
                     <p>Unit Price</p>
                     <p className="text-right">
-                      {Number(order.price).toLocaleString()} ₦
+                      {Number(order.price).toLocaleString()} MNEE
                     </p>
 
                     <p>Total</p>
                     <p className="text-right font-medium text-neutral-200">
-                      {total.toLocaleString()} ₦
+                      {total.toLocaleString()} MNEE
                     </p>
                   </div>
+
+                  {/* Confirm Delivery */}
+                  {!isSellOrder && order.status === "pending" && (
+                    <button
+                      onClick={() => submit(order)}
+                      disabled={confirmingId === order._id}
+                      className="mt-2 w-full py-2 text-xs font-semibold rounded-lg
+                        bg-emerald-600/20 text-emerald-400 border border-emerald-600/40
+                        hover:bg-emerald-600/30
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {confirmingId === order._id
+                        ? "Confirming Delivery..."
+                        : "Confirm Delivery"}
+                      Confirm Delivery
+                    </button>
+                  )}
 
                   {/* Addresses */}
                   <div className="flex justify-between text-xs text-neutral-500 pt-2 border-t border-neutral-800">
                     <p>
                       {isSellOrder ? "Buyer" : "Seller"}:{" "}
                       <span className="text-neutral-300">
-                        {shortAddress(
-                          isSellOrder ? order.buyer : order.seller
-                        )}
+                        {shortAddress(isSellOrder ? order.buyer : order.seller)}
                       </span>
                     </p>
                     <p>Tx #{order.transactionId}</p>

@@ -24,7 +24,6 @@ function App() {
   useWatchTokenTransfers(address, () => {
     readBalance.refetchBalance();
     readBalance.refetchEthBalance();
-    console.log("Transfer detected, balances updated.");
   });
 
   /* ----------------------------- UI ------------------------------ */
@@ -46,7 +45,7 @@ function App() {
           <div className="flex-1 max-w-xl mx-8">
             <input
               type="search"
-              placeholder="Search products, collections, creators…"
+              placeholder="Search products………………"
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2 text-sm placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
             />
