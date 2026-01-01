@@ -48,7 +48,7 @@ contract Marketplace is
         address seller;
         uint256 productId;
         uint8 quantity;
-        uint96 amount;
+        uint256 amount;
         string metadataURI;
         TxStatus status;
     }
@@ -73,6 +73,8 @@ contract Marketplace is
     event ProductPurchased(uint256 indexed productId, uint256 indexed txnId, string uri);
     event ProductStatusUpdated(uint256 indexed productId, bool active);
     event ProductPriceUpdated(uint256 indexed productId, uint96 price);
+
+    // event Debug(string message, uint256 value);
 
     event TransactionCompleted(uint256 indexed txnId);
     event TransactionRefunded(uint256 indexed txnId);
@@ -220,12 +222,10 @@ contract Marketplace is
         require(quantity > 0, "Invalid quantity");
         require(bytes(uri).length > 0, "Invalid URI");
 
-        uint96 totalAmount = p.price * quantity;
-
-        require(
-            mneeToken.transferFrom(msg.sender, address(this), totalAmount),
-            "Payment failed"
-        );
+        uint256 totalAmount = uint256(p.price) * uint256(quantity);
+        require(mneeToken.balanceOf(msg.sender) >= totalAmount, "Insufficient balance");
+        require(mneeToken.allowance(msg.sender, address(this)) >= totalAmount, "Insufficient allowance");
+        require(mneeToken.transferFrom(msg.sender, address(this), totalAmount), "Payment failed");
 
         unchecked {
             transactionCount++;

@@ -36,7 +36,7 @@ export default async function transactionRoute(fastify) {
                 return reply.send({ success: true, transaction });
             } catch (err) {
                 request.log.error(err);
-                return reply.status(500).send({ message: "Upload failed" });
+                return reply.status(500).send({ message: "Failed to create transaction: " + err.message });
             }
         }
     );

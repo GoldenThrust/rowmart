@@ -55,7 +55,7 @@ export default function CreateProduct({
 
       
       try {
-        await approveAndCreate(BigInt(price ?? 0), imageCid);
+        await approveAndCreate(price!.toString(), imageCid);
         toast.success("Product listed successfully!", {
           id: "create-product",
         });
@@ -66,11 +66,9 @@ export default function CreateProduct({
               id,
             },
           })
-          .then(() => {
-            toast("Product deleted");
-          })
-          .catch(() => {
-            toast("Failed to delete product");
+
+          toast.error(`Error: ${(error as any).message}`, {
+            id: "create-product",
           });
       }
     } catch (error: any) {

@@ -910,9 +910,9 @@ export const MarketplaceContractConfig = [process.env.MARKETPLACE_ADDRESS, [
         "type": "uint8"
       },
       {
-        "internalType": "uint96",
+        "internalType": "uint256",
         "name": "amount",
-        "type": "uint96"
+        "type": "uint256"
       },
       {
         "internalType": "string",
@@ -959,5 +959,4 @@ export const MarketplaceContractConfig = [process.env.MARKETPLACE_ADDRESS, [
     "stateMutability": "payable",
     "type": "function"
   }
-]
-]
+]]

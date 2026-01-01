@@ -230,33 +230,48 @@ describe("Marketplace (UUPS)", function () {
     ).to.be.revertedWith("Not seller");
   });
 
-  //   /*//////////////////////////////////////////////////////////////
-  //                         PURCHASE & ESCROW
-  //   //////////////////////////////////////////////////////////////*/
+  /*//////////////////////////////////////////////////////////////
+                          PURCHASE & ESCROW
+  //////////////////////////////////////////////////////////////*/
 
   it("buyer can purchase product", async () => {
     const { marketplace, seller, buyer, Token } = await loadFixture(
       deployFixture
     );
 
-    const quantity = 2;
+    const quantity = 5;
     const uri = "ipfs://metadata";
+
+    const balanceBefore = await Token.balanceOf(buyer.address);
+    console.log("Balance before:", ethers.formatEther(balanceBefore));
+
+    const pricePerItem = ethers.parseEther("10");
+    const amount = pricePerItem * BigInt(quantity);
+
     await createProduct(Token, marketplace, seller);
 
-    await Token.connect(buyer).approve(
-      marketplace.target,
-      ethers.parseEther("10") * BigInt(quantity)
-    );
+    await Token.connect(buyer).approve(marketplace.target, amount);
 
-    await expect(
-      marketplace.connect(buyer).buyProduct(1, quantity, uri)
-    )
+    await expect(marketplace.connect(buyer).buyProduct(1, quantity, uri))
       .to.emit(marketplace, "ProductPurchased")
       .withArgs(1, 1, uri);
 
+    const balanceAfter = await Token.balanceOf(buyer.address);
+    console.log("Balance after:", ethers.formatEther(balanceAfter), ethers.formatEther(balanceBefore - amount));
+
+    expect(balanceAfter).to.equal(balanceBefore - amount);
+    console.log()
+
+    // Validate transaction struct
     const txn = await marketplace.transactions(1);
+
     expect(txn.buyer).to.equal(buyer.address);
-    expect(txn.status).to.equal(0); // Pending
+    expect(txn.seller).to.equal(seller.address);
+    expect(txn.productId).to.equal(1);
+    expect(txn.quantity).to.equal(quantity);
+    expect(txn.amount).to.equal(amount);
+    expect(txn.metadataURI).to.equal(uri);
+    expect(txn.status).to.equal(0); // TxStatus.Pending
   });
 
   /*//////////////////////////////////////////////////////////////

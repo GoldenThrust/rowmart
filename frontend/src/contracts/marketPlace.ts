@@ -910,9 +910,9 @@ export const MarketplaceContractConfig = {
           type: "uint8",
         },
         {
-          internalType: "uint96",
+          internalType: "uint256",
           name: "amount",
-          type: "uint96",
+          type: "uint256",
         },
         {
           internalType: "string",

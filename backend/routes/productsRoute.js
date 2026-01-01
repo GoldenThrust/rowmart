@@ -71,9 +71,8 @@ export default async function productRoutes(fastify, opts) {
 
                 return reply.send({ success: true, product });
             } catch (err) {
-                console.error(err);
                 request.log.error(err);
-                return reply.status(500).send({ message: "Upload failed" });
+                return reply.status(500).send({ message: "Upload failed: " + err.message.message && err.message.message !== undefined ? err.message.message : err.message });
             }
         }
     );

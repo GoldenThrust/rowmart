@@ -55,7 +55,7 @@ function App() {
         {openForm && (
           <CreateProduct setOpenForm={setOpenForm} readBalance={readBalance} />
         )}
-        <DisplayProducts query={searchQuery} />
+        <DisplayProducts query={searchQuery} readBalance={readBalance} />
       </main>
     </>
   );

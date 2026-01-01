@@ -5,8 +5,15 @@ import ProductDetails from "../ui/ProductDetails";
 import { useConnection } from "wagmi";
 import toast from "react-hot-toast";
 import useCreateTransaction from "../../contracts/hooks/useCreateTransaction";
+import useReadBalance from "../../contracts/hooks/useReadBalance";
 
-export default function DisplayProducts({ query }: { query: string | null }) {
+export default function DisplayProducts({
+  query,
+  readBalance,
+}: {
+  query: string | null;
+  readBalance: ReturnType<typeof useReadBalance>;
+}) {
   const { address } = useConnection();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
@@ -37,7 +44,7 @@ export default function DisplayProducts({ query }: { query: string | null }) {
       console.log("Creating transaction...");
       console.log(buyerEmail);
 
-      toast.loading("Processing Transaction...", { id: "create-product" });
+      toast.loading("Processing Transaction...", { id: "buy-product" });
 
       const response = await axios.post("create-transaction", {
         productId: product._id,
@@ -52,10 +59,6 @@ export default function DisplayProducts({ query }: { query: string | null }) {
 
       const { _id: id, detailsCid } = response.data.transaction;
 
-      toast.success("Product listed successfully!", {
-        id: "create-product",
-      });
-
       try {
         if (!product.productId || Number(product.productId) <= 0) {
           throw new Error("Invalid productId");
@@ -67,26 +70,30 @@ export default function DisplayProducts({ query }: { query: string | null }) {
           detailsCid,
           price.toString()
         );
+
+        readBalance.refetchBalance();
+        readBalance.refetchEthBalance();
+        toast.success("Product bought successfully!", {
+          id: "buy-product",
+        });
       } catch (error) {
-        axios
-          .delete("/delete-transaction", {
-            data: {
-              id,
-            },
-          })
-          .then(() => {
-            toast("Transaction Canceled");
-          })
-          .catch(() => {
-            toast("Failed to delete product");
-          });
+        axios.delete("/delete-transaction", {
+          data: {
+            id,
+          },
+        });
+
+        toast.error(`Error: ${(error as any).name}`, {
+          id: "buy-product",
+        });
       }
     } catch (error: any) {
       toast.error(`Error: ${error.response.data.message}`, {
-        id: "create-product",
+        id: "buy-product",
       });
     } finally {
       setDisableSubmit(false);
+      setSelectedProduct(null);
     }
   };
 

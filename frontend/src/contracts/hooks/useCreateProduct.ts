@@ -1,9 +1,12 @@
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import { MarketplaceContractConfig } from "../marketPlace";
 import { MNEEContractConfig } from "../mnee";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import { useTokenDetails } from "./useTokenDetails";
-
 
 // TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateProduct() {
@@ -16,17 +19,16 @@ export default function useCreateProduct() {
 
   const { decimals } = useTokenDetails();
 
-  const { isLoading, isSuccess } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const { data: createProductFee } = useReadContract({
     ...MarketplaceContractConfig,
     functionName: "createProductFee",
   });
 
-  const approveAndCreate = async (price: bigint, metadataCID: string) => {
+  const approveAndCreate = async (price: string, metadataCID: string) => {
     if (!createProductFee) throw new Error("Fee not loaded");
 
     // 1️⃣ Approve MNEE
@@ -40,13 +42,16 @@ export default function useCreateProduct() {
     await writeContractAsync({
       ...MarketplaceContractConfig,
       functionName: "createProduct",
-      args: [price, metadataCID],
+      args: [parseUnits(price, decimals!), metadataCID],
     });
   };
 
   return {
     approveAndCreate,
-    createProductFee: formatUnits(BigInt(createProductFee ?? 0), decimals ?? 18),
+    createProductFee: formatUnits(
+      BigInt(createProductFee ?? 0),
+      decimals ?? 18
+    ),
     isPending,
     isLoading,
     isSuccess,

@@ -1,8 +1,10 @@
+// import { Contract } from "ethers";
 import Product from "../../models/product.js";
 import Transaction from "../../models/transaction.js";
+// import { MNEEContractConfig } from "../mnee.js";
 
 export function listenToEvents(fastify) {
-    const { contract } = fastify.ethers;
+    const { contract, provider } = fastify.ethers;
     const { mailservice } = fastify;
 
     contract.on(
@@ -39,4 +41,23 @@ export function listenToEvents(fastify) {
             }
         }
     );
+
+    // contract.on(
+    //     "Debug",
+    //     async (message, value) => {
+    //         console.log(message, value);
+    //     }
+    // )
+
+    // const contracts = new Contract(
+    //     ...MNEEContractConfig,
+    //     provider
+    // );
+
+    // contracts.on(
+    //     "Transfer",
+    //     async (from, to, value) => {
+    //         console.log(from, to, value);
+    //     }
+    // );
 }
