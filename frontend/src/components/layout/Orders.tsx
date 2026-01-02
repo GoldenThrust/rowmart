@@ -40,6 +40,11 @@ export default function Orders({
   const [loading, setLoading] = useState<boolean>(false);
   const [confirmingId, setConfirmingId] = useState<string>("");
   const { confirmDelivery } = useConfirmDelivery();
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  });
 
   /* ---------------------- Confirm Delivery ----------------------- */
   async function submit(order: Order) {
@@ -103,10 +108,17 @@ export default function Orders({
             address,
             isSeller,
             status: status === "all" ? undefined : status,
+            page: pagination.page,
           },
         });
 
         setOrders(res.data.transactions);
+        setPagination((p: PaginationMeta) => ({
+          ...p,
+          page: res.data.meta.page,
+          totalPages: res.data.meta.totalPages,
+          total: res.data.meta.total,
+        }));
       } catch (error) {
         console.error("Failed to fetch orders", error);
       } finally {
@@ -115,7 +127,11 @@ export default function Orders({
     };
 
     fetchOrders();
-  }, [address, isSeller, status]);
+  }, [address, isSeller, status,  pagination.page]);
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, page: 1 }));
+  }, [status, isSeller,]);
 
   /* ----------------------------- UI ------------------------------ */
 
@@ -253,23 +269,34 @@ export default function Orders({
                       {total.toLocaleString()} MNEE
                     </p>
                   </div>
-
-                  {/* Confirm Delivery */}
-                  {!isSellOrder && order.status === "pending" && (
-                    <button
-                      onClick={() => submit(order)}
-                      disabled={confirmingId === order._id}
-                      className="mt-2 w-full py-2 text-xs font-semibold rounded-lg
+                  <div className="mt-3 flex gap-2">
+                    {/* Confirm Delivery */}
+                    {!isSellOrder && order.status === "pending" && (
+                      <button
+                        onClick={() => submit(order)}
+                        disabled={confirmingId === order._id}
+                        className="flex-1 py-2 text-xs font-semibold rounded-lg
                         bg-emerald-600/20 text-emerald-400 border border-emerald-600/40
-                        hover:bg-emerald-600/30
-                        disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {confirmingId === order._id
-                        ? "Confirming Delivery..."
-                        : "Confirm Delivery"}
-                      Confirm Delivery
-                    </button>
-                  )}
+                        hover:bg-emerald-600/30 disabled:opacity-50"
+                      >
+                        {confirmingId === order._id
+                          ? "Confirming Delivery..."
+                          : "Confirm Delivery"}
+                      </button>
+                    )}
+                    {order.status === "pending" && (
+                      <button
+                        // onClick={() => openDispute(order)}
+                        // disabled={disputingId === order._id}
+                        className="flex-1 py-2 text-xs font-semibold rounded-lg
+                        bg-purple-600/20 text-purple-400 border border-purple-600/40
+                        hover:bg-purple-600/30 disabled:opacity-50"
+                      >
+                        {/* {disputingId === order._id */}
+                        {false ? "Opening..." : "Open Dispute"}
+                      </button>
+                    )}
+                  </div>
 
                   {/* Addresses */}
                   <div className="flex justify-between text-xs text-neutral-500 pt-2 border-t border-neutral-800">
@@ -291,6 +318,45 @@ export default function Orders({
             );
           })}
         </div>
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 pt-4 border-t border-neutral-800">
+            <button
+              disabled={pagination.page === 1}
+              onClick={() =>
+                setPagination((p) => ({
+                  ...p,
+                  page: Math.max(p.page - 1, 1),
+                }))
+              }
+              className="px-4 py-2 text-xs rounded-lg border border-neutral-700
+        disabled:opacity-40 hover:border-neutral-500"
+            >
+              Previous
+            </button>
+
+            <span className="text-xs text-neutral-400">
+              Page{" "}
+              <span className="text-white font-medium">{pagination.page}</span>{" "}
+              of {pagination.totalPages}
+            </span>
+
+            <button
+              disabled={pagination.page === pagination.totalPages}
+              onClick={() =>
+                setPagination((p) => ({
+                  ...p,
+                  page: Math.min(p.page + 1, p.totalPages),
+                }))
+              }
+              className="px-4 py-2 text-xs rounded-lg border border-neutral-700
+        disabled:opacity-40 hover:border-neutral-500"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

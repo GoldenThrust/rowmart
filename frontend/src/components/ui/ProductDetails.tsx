@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
 /* ----------------------------- Types ----------------------------- */
@@ -24,9 +25,33 @@ export default function ProductDetails({
   const [quantity, setQuantity] = useState(1);
   const [email, setEmail] = useState(defaultEmail);
 
+    const [rating, setRating] = useState(0);
+  const [review, setReview] = useState("");
+  const [submittingRating, setSubmittingRating] = useState(false);
+
   const totalPrice = quantity * Number(product.price);
 
-  return (
+   // Submit rating
+  const submitRating = async () => {
+    if (!rating) return;
+    try {
+      setSubmittingRating(true);
+      toast.loading("Submitting rating...", { id: "rating" });
+
+
+      toast.success("Rating submitted!", { id: "rating" });
+      setRating(0);
+      setReview("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit rating", { id: "rating" });
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
+
+
+   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="relative w-full max-w-5xl bg-neutral-950 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
@@ -49,6 +74,21 @@ export default function ProductDetails({
             />
 
             <p className="text-sm text-neutral-400">{product.description}</p>
+
+            {/* Rating Display */}
+            <div className="flex items-center gap-2 text-sm text-neutral-400">
+              <div className="flex text-yellow-400">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i}>
+                    {i < Math.round(product.averageRating ?? 0) ? "★" : "☆"}
+                  </span>
+                ))}
+              </div>
+              <span>
+                {product.averageRating?.toFixed(1) ?? "0.0"} (
+                {product.ratingCount ?? 0} reviews)
+              </span>
+            </div>
 
             {/* Seller Info */}
             <div className="grid grid-cols-2 gap-4 text-sm text-neutral-400 border-t border-neutral-800 pt-4">
@@ -74,6 +114,45 @@ export default function ProductDetails({
                   {new Date(product.createdAt).toLocaleDateString()}
                 </p>
               </div>
+            </div>
+
+            {/* Rate Product */}
+            <div className="border-t border-neutral-800 pt-4 space-y-3">
+              <p className="text-sm font-medium text-white">Rate this product</p>
+
+              {/* Stars */}
+              <div className="flex gap-1 text-2xl text-yellow-400 cursor-pointer">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    onClick={() => setRating(star)}
+                    className={`transition ${
+                      rating >= star ? "opacity-100" : "opacity-40"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              {/* Review */}
+              <textarea
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+                placeholder="review..."
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-3 text-sm text-white resize-none focus:outline-none focus:border-yellow-500"
+              />
+
+              {/* Submit */}
+              <button
+                onClick={submitRating}
+                disabled={!rating || submittingRating}
+                className="w-fit px-4 py-2 rounded-lg text-sm font-semibold
+                bg-yellow-500/20 text-yellow-400 border border-yellow-500/40
+                hover:bg-yellow-500/30 disabled:opacity-40"
+              >
+                {submittingRating ? "Submitting..." : "Submit Rating"}
+              </button>
             </div>
           </div>
 
@@ -153,6 +232,15 @@ export default function ProductDetails({
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Delivery Note */}
+        <div className="m-5 w-11/12 rounded-xl border border-yellow-600/40 bg-yellow-600/10 p-4 text-sm text-yellow-300">
+          <span className="font-semibold">Note:</span> Make sure you contact the
+          seller about delivery immediately after placing an order. If the
+          seller does not respond within{" "}
+          <span className="font-semibold">48 hours</span>, open a dispute to be
+          refunded.
         </div>
       </div>
     </div>

@@ -21,6 +21,11 @@ export default function DisplayProducts({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [disableSubmit, setDisableSubmit] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  });
 
   const { approveAndBuy, isPending } = useCreateTransaction();
 
@@ -28,9 +33,28 @@ export default function DisplayProducts({
 
   useEffect(() => {
     axios
-      .get(query ? `/get-products?search=${query}` : `/get-products`)
-      .then((res) => setProducts(res.data.products))
+      .get("/get-products", {
+        params: {
+          search: query ?? undefined,
+          page: pagination.page,
+        },
+      })
+      .then((res) => {
+        setProducts(res.data.products);
+        setPagination((p: PaginationMeta) => ({
+          ...p,
+          page: res.data.meta.page,
+          totalPages: res.data.meta.totalPages,
+          total: res.data.meta.total,
+        }));
+
+        console.log(pagination);
+      })
       .catch((err) => console.error("Error fetching products:", err));
+  }, [query, pagination.page]);
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, page: 1 }));
   }, [query]);
 
   /* --------------------------- Buy Flow --------------------------- */
@@ -151,6 +175,43 @@ export default function DisplayProducts({
           </div>
         )}
       </div>
+
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 pb-6">
+          <button
+            disabled={pagination.page === 1}
+            onClick={() =>
+              setPagination((p) => ({
+                ...p,
+                page: Math.max(p.page - 1, 1),
+              }))
+            }
+            className="px-4 py-2 text-xs rounded-lg border border-neutral-700
+        disabled:opacity-40"
+          >
+            Previous
+          </button>
+
+          <span className="text-xs text-neutral-400">
+            Page <span className="text-white">{pagination.page}</span> of{" "}
+            {pagination.totalPages}
+          </span>
+
+          <button
+            disabled={pagination.page === pagination.totalPages}
+            onClick={() =>
+              setPagination((p) => ({
+                ...p,
+                page: Math.min(p.page + 1, p.totalPages),
+              }))
+            }
+            className="px-4 py-2 text-xs rounded-lg border border-neutral-700
+        disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Product Modal */}
       {selectedProduct && (

@@ -100,7 +100,7 @@ export default async function productRoutes(fastify, opts) {
         { schema: getProductsSchema },
         async (request, reply) => {
             try {
-                const { page = 1, limit = 10, search: searchQuery } = request.query;
+                const { page = 1, limit = 12, search: searchQuery } = request.query;
 
                 const search = searchQuery ? { $or: [{ name: { $regex: searchQuery, $options: "i" } }, { description: { $regex: searchQuery, $options: "i" } }], active: true } : { active: true };
 
