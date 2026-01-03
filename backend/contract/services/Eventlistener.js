@@ -41,6 +41,134 @@ export function listenToEvents(fastify) {
             }
         }
     );
+    contract.on(
+        "TransactionCompleted",
+        async (txnId) => {
+            console.log("TransactionCompleted event detected:", { txnId });
+            try {
+                const transaction = await Transaction.findOne({
+                    transactionId: txnId.toString(),
+                }).populate("product");
+
+                
+                transaction.status = 'completed';
+                await transaction.save();
+
+                if (!transaction) return;
+
+                await mailservice.sendSellerTransactionCompletionMail(
+                    transaction.product.email,
+                    transaction
+                );
+            } catch (error) {
+                fastify.log.error("Error handling TransactionCompleted event:", error);
+            }
+        }
+    );
+
+
+    contract.on(
+        "TransactionRefunded",
+        async (txnId) => {
+            console.log("TransactionRefunded event detected:", { txnId });
+            try {
+                const transaction = await Transaction.findOne({
+                    transactionId: txnId.toString(),
+                }).populate("product");
+                
+                transaction.status = 'refunded';
+                await transaction.save();
+
+                if (!transaction) return;
+
+                await mailservice.sendBuyerTransactionRefundedMail(
+                    transaction.buyerEmail,
+                    transaction
+                );
+            } catch (error) {
+                fastify.log.error("Error handling TransactionRefunded event:", error);
+            }
+        }
+    );
+
+    contract.on(
+        "DisputeOpened",
+        async (txnId) => {
+            console.log("DisputeOpened event detected:", { txnId });
+            try {
+                const transaction = await Transaction.findOne({
+                    transactionId: txnId.toString(),
+                }).populate("product");
+
+                transaction.status = 'disputed';
+                await transaction.save();
+
+                if (!transaction) return;
+
+                await mailservice.sendBuyerDisputeOpenedMail(
+                    transaction.buyerEmail,
+                    transaction
+                );
+
+                await mailservice.sendSellerDisputeOpenedMail(
+                    transaction.product.email,
+                    transaction
+                );
+            } catch (error) {
+                fastify.log.error("Error handling DisputeOpened event:", error);
+            }
+        }
+    );
+
+    contract.on(
+        "DisputeResolved",
+        async (txnId, buyerWon) => {
+            console.log("DisputeResolved event detected:", { txnId, buyerWon });
+            try {
+                const transaction = await Transaction.findOne({
+                    transactionId: txnId.toString(),
+                }).populate("product");
+
+                if (!transaction) return;
+
+                await mailservice.sendBuyerDisputeResolvedMail(
+                    transaction.buyerEmail,
+                    transaction,
+                    buyerWon
+                );
+
+                await mailservice.sendSellerDisputeResolvedMail(
+                    transaction.product.email,
+                    transaction,
+                    buyerWon
+                );
+            } catch (error) {
+                fastify.log.error("Error handling DisputeResolved event:", error);
+            }
+        }
+    );
+
+    contract.on(
+        "ReviewSubmitted",
+        async (productId, reviewer) => {
+            console.log("ReviewSubmitted event detected:", { productId, reviewer });
+            try {
+                const product = await Product.findOne({
+                    productId: productId.toString(),
+                });
+
+                if (!product) return;
+
+                await mailservice.sendSellerReviewNotificationMail(
+                    product.email,
+                    product,
+                    reviewer
+                );
+            } catch (error) {
+                fastify.log.error("Error handling ReviewSubmitted event:", error);
+            }
+        }
+    );
 
     // contract.on(
     //     "Debug",

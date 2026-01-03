@@ -91,7 +91,8 @@ export default function CreateProduct({
             name="name"
             placeholder="Product name"
             required
-            className="input-field"
+            className="w-full h-11 rounded-lg bg-neutral-950 border border-neutral-700 px-4 text-sm text-white
+             focus:outline-none focus:border-emerald-500"
           />
 
           <input
@@ -101,15 +102,14 @@ export default function CreateProduct({
             step="any"
             placeholder="Price (MNEE)"
             required
-            className="input-field"
+            className="w-full h-11 rounded-lg bg-neutral-950 border border-neutral-700 px-4 text-sm text-white
+             focus:outline-none focus:border-emerald-500"
           />
 
           {/* Image Upload */}
           <label className="group flex flex-col items-center justify-center gap-2 border border-dashed border-neutral-700 rounded-xl p-4 cursor-pointer hover:border-emerald-500 transition">
             <Upload className="text-gray-400 group-hover:text-emerald-400" />
-            <span className="text-sm text-gray-400">
-              Upload product image
-            </span>
+            <span className="text-sm text-gray-400">Upload product image</span>
             <input
               type="file"
               name="image"
@@ -118,9 +118,7 @@ export default function CreateProduct({
               required
               onChange={(e) =>
                 setImagePreview(
-                  e.target.files
-                    ? URL.createObjectURL(e.target.files[0])
-                    : null
+                  e.target.files ? URL.createObjectURL(e.target.files[0]) : null
                 )
               }
             />
@@ -140,14 +138,23 @@ export default function CreateProduct({
             defaultValue={userEmail}
             placeholder="Email for notifications"
             required
-            className="input-field"
+            className="w-full h-11 rounded-lg bg-neutral-950 border border-neutral-700 px-4 text-sm text-white
+             focus:outline-none focus:border-emerald-500"
           />
+          <div className="flex gap-2 items-start rounded-lg border border-blue-600/30 bg-blue-600/10 px-3 py-2 text-xs text-blue-300">
+            <span className="mt-0.5">ℹ️</span>
+            <p className="leading-relaxed">
+              Ensure your email address is correct and active. It will be used
+              for direct communication between you and the buyer.
+            </p>
+          </div>
 
           <textarea
             name="description"
             placeholder="Short product description"
             required
-            className="input-field h-24 resize-none"
+            className="w-full rounded-lg bg-neutral-950 border border-neutral-700 p-4 text-sm text-white
+             focus:outline-none focus:border-emerald-500 h-24 resize-none"
           />
 
           {/* Fee Info */}

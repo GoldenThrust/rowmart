@@ -1,9 +1,10 @@
-import { createProductSchema, updateProductSchema, deleteProductSchema, getProductsSchema, getProductSchema } from "../schemas/product.schema.js";
+import { createProductSchema, updateProductSchema, deleteProductSchema, getProductsSchema, getProductSchema, rateProductSchema } from "../schemas/product.schema.js";
 import { buffer } from "stream/consumers";
 import { v4 } from "uuid";
 import Product from "../models/product.js";
 import { getProductCount } from "../contract/services/getProductCount.js";
 import { File } from "buffer";
+import Review from "../models/review.js";
 
 // TODO: listen to product events and update status and productId accordingly
 // TODO: delete product that are not on chain. 
@@ -54,7 +55,6 @@ export default async function productRoutes(fastify, opts) {
                     type: image.metadata.mimetype,
                 });
 
-
                 // Read productCount from blockchain
                 const productCount = await getProductCount(fastify);
 
@@ -100,12 +100,12 @@ export default async function productRoutes(fastify, opts) {
         { schema: getProductsSchema },
         async (request, reply) => {
             try {
-                const { page = 1, limit = 12, search: searchQuery } = request.query;
+                const { page, limit, search: searchQuery } = request.query;
 
                 const search = searchQuery ? { $or: [{ name: { $regex: searchQuery, $options: "i" } }, { description: { $regex: searchQuery, $options: "i" } }], active: true } : { active: true };
 
                 // TODO: price range filter
-                const products = await Product.find(search).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
+                const products = await Product.find(search).populate('reviews').skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
                 const total = await Product.countDocuments(search);
 
                 return reply.send({
@@ -119,6 +119,7 @@ export default async function productRoutes(fastify, opts) {
                     products,
                 });
             } catch (err) {
+                console.error(err);
                 request.log.error(err);
                 return reply.status(500).send({ success: false, message: "Failed to get products" });
             }
@@ -133,7 +134,7 @@ export default async function productRoutes(fastify, opts) {
             try {
                 const { productId, id } = request.query;
 
-                const result = await Product.findOne(id ? { _id: id } : { productId });
+                const result = await Product.findOne(id ? { _id: id } : { productId }).populate('reviews');
 
                 return reply.send({ success: true, data: result });
             } catch (err) {
@@ -168,6 +169,88 @@ export default async function productRoutes(fastify, opts) {
             } catch (err) {
                 request.log.error(err);
                 return reply.status(500).send({ message: "Failed to delete product" });
+            }
+        }
+    );
+    // ---------------- RATE PRODUCT ----------------
+    fastify.put(
+        "/rate-product/:id",
+        { schema: rateProductSchema },
+        async (request, reply) => {
+            try {
+                const { id } = request.params;
+                const { rating, comment, reviewer } = request.body;
+
+                const product = await Product.findById(id);
+
+                if (!product) {
+                    return reply.status(404).send({ message: "Product not found" });
+                }
+
+                if (product.seller === reviewer) {
+                    return reply.status(403).send({
+                        message: "You cannot rate your own product",
+                    });
+                }
+
+                const existingRating = await Review.findOne({
+                    reviewer,
+                    _id: { $in: product.reviews },
+                });
+
+                if (existingRating) {
+                    return reply.status(409).send({
+                        message: "You have already rated this product",
+                    });
+                }
+
+                const ratingDoc = await Review.create({
+                    reviewer,
+                    rating,
+                    comment,
+                });
+
+                const updatedProduct = await Product.findByIdAndUpdate(
+                    id,
+                    {
+                        $push: { reviews: ratingDoc._id },
+                    },
+                    {
+                        new: true,
+                        runValidators: true,
+                    }
+                );
+
+                const stats = await Review.aggregate([
+                    { $match: { _id: { $in: updatedProduct.reviews } } },
+                    {
+                        $group: {
+                            _id: null,
+                            avg: { $avg: "$reviews" },
+                            count: { $sum: 1 },
+                        },
+                    },
+                ]);
+
+                const averageRating = stats[0]?.avg || 0;
+                const ratingCount = stats[0]?.count || 0;
+
+                const finalProduct = await Product.findByIdAndUpdate(
+                    id,
+                    {
+                        averageRating,
+                        ratingCount,
+                    },
+                    { new: true }
+                ).populate("reviews");
+
+                return reply.send({
+                    success: true,
+                    product: finalProduct,
+                });
+            } catch (err) {
+                request.log.error(err);
+                return reply.status(500).send({ message: "Failed to rate product" });
             }
         }
     );

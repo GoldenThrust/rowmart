@@ -65,6 +65,10 @@ export default function DisplayProducts({
     buyerEmail: string,
     price: number
   ) => {
+    if (address === product.seller) {
+      toast("You can't buy your own product");
+      return;
+    }
     try {
       setDisableSubmit(true);
 

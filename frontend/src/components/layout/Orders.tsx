@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useConnection } from "wagmi";
 import useConfirmDelivery from "../../contracts/hooks/useConfirmDelivery";
 import toast from "react-hot-toast";
+import useCreateDispute from "../../contracts/hooks/useCreateDispute";
 
 // TODO: Add Pagination
 /* ---------------------------- Helpers ---------------------------- */
@@ -39,6 +40,8 @@ export default function Orders({
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [confirmingId, setConfirmingId] = useState<string>("");
+  const [disputingId, setDisputingId] = useState<string>("");
+  const { createDispute } = useCreateDispute();
   const { confirmDelivery } = useConfirmDelivery();
   const [pagination, setPagination] = useState<PaginationMeta>({
     page: 1,
@@ -47,7 +50,7 @@ export default function Orders({
   });
 
   /* ---------------------- Confirm Delivery ----------------------- */
-  async function submit(order: Order) {
+  async function deliveryConfirmation(order: Order) {
     if (!address) return;
     if (order.buyer !== address) return;
     if (order.status !== "pending") return;
@@ -94,6 +97,26 @@ export default function Orders({
     }
   }
 
+  // TODO: use backend Event to update Dispute details and rating and review instead of using. axios
+
+  async function openDispute(order: Order) {
+    try {
+      setDisputingId(order._id);
+      toast.loading("Creating dispute...", { id: "dispute" });
+      try {
+        await createDispute(order.transactionId);
+        toast.success("Dispute Opened!", { id: "dispute" });
+      } catch (error) {
+        throw error;
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create dispute", { id: "dispute" });
+    } finally {
+      setDisputingId("");
+    }
+  }
+
   /* ------------------------- Fetch Orders ------------------------ */
 
   useEffect(() => {
@@ -127,11 +150,11 @@ export default function Orders({
     };
 
     fetchOrders();
-  }, [address, isSeller, status,  pagination.page]);
+  }, [address, isSeller, status, pagination.page]);
 
   useEffect(() => {
     setPagination((p) => ({ ...p, page: 1 }));
-  }, [status, isSeller,]);
+  }, [status, isSeller]);
 
   /* ----------------------------- UI ------------------------------ */
 
@@ -273,7 +296,7 @@ export default function Orders({
                     {/* Confirm Delivery */}
                     {!isSellOrder && order.status === "pending" && (
                       <button
-                        onClick={() => submit(order)}
+                        onClick={() => deliveryConfirmation(order)}
                         disabled={confirmingId === order._id}
                         className="flex-1 py-2 text-xs font-semibold rounded-lg
                         bg-emerald-600/20 text-emerald-400 border border-emerald-600/40
@@ -286,14 +309,15 @@ export default function Orders({
                     )}
                     {order.status === "pending" && (
                       <button
-                        // onClick={() => openDispute(order)}
-                        // disabled={disputingId === order._id}
+                        onClick={() => openDispute(order)}
+                        disabled={disputingId === order._id}
                         className="flex-1 py-2 text-xs font-semibold rounded-lg
                         bg-purple-600/20 text-purple-400 border border-purple-600/40
                         hover:bg-purple-600/30 disabled:opacity-50"
                       >
-                        {/* {disputingId === order._id */}
-                        {false ? "Opening..." : "Open Dispute"}
+                        {disputingId === order._id
+                          ? "Opening..."
+                          : "Open Dispute"}
                       </button>
                     )}
                   </div>

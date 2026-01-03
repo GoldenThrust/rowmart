@@ -1,4 +1,10 @@
 // Shared response schemas
+export const review = {
+  reviewer: { type: "string" },
+  rating: { type: "string" },
+  comment: { type: "string" },
+};
+
 export const productProperties = {
   _id: { type: "string" },
   imageId: { type: "string" },
@@ -8,6 +14,10 @@ export const productProperties = {
   price: { type: "string" },
   seller: { type: "string" },
   active: { type: "boolean" },
+  reviews: {
+    type: "array",
+    items: review
+  },
   description: { type: "string" },
   productId: { type: "string" },
   createdAt: { type: "string" },
@@ -91,7 +101,7 @@ export const getProductsSchema = {
     type: "object",
     properties: {
       page: { type: "integer", minimum: 1, default: 1 },
-      limit: { type: "integer", minimum: 1, maximum: 100, default: 10 },
+      limit: { type: "integer", minimum: 1, maximum: 100, default: 12 },
       search: { type: "string" }
     }
   },
@@ -173,4 +183,55 @@ export const deleteProductSchema = {
       }
     }
   }
+};
+
+
+/* -----------------------------------------------------
+   RATE PRODUCT
+----------------------------------------------------- */
+export const rateProductSchema = {
+  params: {
+    type: "object",
+    required: ["id"],
+    properties: {
+      id: {
+        type: "string",
+        minLength: 24,
+        maxLength: 24,
+      },
+    },
+  },
+
+  body: {
+    type: "object",
+    required: ["rating", "comment", "reviewer"],
+    additionalProperties: false,
+    properties: {
+      rating: {
+        type: "number",
+        minimum: 1,
+        maximum: 5,
+      },
+      seller: {
+        type: "string"
+      },
+      reviewer: {
+        type: "string",
+        maxLength: 500,
+      },
+    },
+  },
+
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        success: { type: "boolean" },
+        product: {
+          type: "object",
+          properties: productProperties
+        },
+      },
+    },
+  },
 };

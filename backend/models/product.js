@@ -36,6 +36,18 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
+    reviews: [{
+        type: Schema.Types.ObjectId,
+        ref: "Review",
+    }],
+    averageRating: {
+        type: Number,
+        default: 0,
+    },
+    ratingCount: {
+        type: Number,
+        default: 0,
+    },
     active: {
         type: Boolean,
         default: true

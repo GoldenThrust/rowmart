@@ -1,7 +1,10 @@
+import axios from "axios";
 import { X } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import useCreateReview from "../../contracts/hooks/useCreateReview";
+import { useConnection } from "wagmi";
 
 /* ----------------------------- Types ----------------------------- */
 export default function ProductDetails({
@@ -22,26 +25,38 @@ export default function ProductDetails({
   ) => void;
   defaultEmail: string;
 }) {
+  const { address } = useConnection();
   const [quantity, setQuantity] = useState(1);
   const [email, setEmail] = useState(defaultEmail);
 
-    const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+  const [showReviews, setShowReviews] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
+  const { createReview } = useCreateReview();
 
   const totalPrice = quantity * Number(product.price);
 
-   // Submit rating
-  const submitRating = async () => {
+  // Submit rating
+  const submitRating = async (product: Product) => {
     if (!rating) return;
     try {
       setSubmittingRating(true);
       toast.loading("Submitting rating...", { id: "rating" });
 
-
-      toast.success("Rating submitted!", { id: "rating" });
-      setRating(0);
-      setReview("");
+      try {
+        await createReview(product.productId, rating, review);
+        await axios.put(`rate-product/${product._id}`, {
+          rating,
+          comment: review,
+          reviewer: address,
+        });
+        toast.success("Rating submitted!", { id: "rating" });
+        setRating(0);
+        setReview("");
+      } catch (error) {
+        throw error;
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to submit rating", { id: "rating" });
@@ -50,8 +65,7 @@ export default function ProductDetails({
     }
   };
 
-
-   return (
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="relative w-full max-w-5xl bg-neutral-950 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
@@ -76,7 +90,10 @@ export default function ProductDetails({
             <p className="text-sm text-neutral-400">{product.description}</p>
 
             {/* Rating Display */}
-            <div className="flex items-center gap-2 text-sm text-neutral-400">
+            <div
+              className="flex items-center gap-2 text-sm text-neutral-400 cursor-pointer"
+              onClick={() => setShowReviews((prev) => !prev)}
+            >
               <div className="flex text-yellow-400">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <span key={i}>
@@ -89,6 +106,33 @@ export default function ProductDetails({
                 {product.ratingCount ?? 0} reviews)
               </span>
             </div>
+
+            {showReviews && (
+              <div className="mt-2 border-t border-neutral-800 pt-2 space-y-3 max-h-64 overflow-y-auto">
+                {product.reviews.length === 0 ? (
+                  <p className="text-neutral-500 text-sm">No reviews yet.</p>
+                ) : (
+                  product.reviews.map((r: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-2 border border-neutral-700 rounded-lg"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-white truncate">
+                          {r.reviewer ?? "Anonymous"}
+                        </span>
+                        <span className="text-yellow-400 text-sm">
+                          {"★".repeat(r.rating) + "☆".repeat(5 - r.rating)}
+                        </span>
+                      </div>
+                      <p className="text-neutral-400 text-sm mt-1">
+                        {r.comment}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
 
             {/* Seller Info */}
             <div className="grid grid-cols-2 gap-4 text-sm text-neutral-400 border-t border-neutral-800 pt-4">
@@ -118,7 +162,9 @@ export default function ProductDetails({
 
             {/* Rate Product */}
             <div className="border-t border-neutral-800 pt-4 space-y-3">
-              <p className="text-sm font-medium text-white">Rate this product</p>
+              <p className="text-sm font-medium text-white">
+                Rate this product
+              </p>
 
               {/* Stars */}
               <div className="flex gap-1 text-2xl text-yellow-400 cursor-pointer">
@@ -145,7 +191,7 @@ export default function ProductDetails({
 
               {/* Submit */}
               <button
-                onClick={submitRating}
+                onClick={() => submitRating(product)}
                 disabled={!rating || submittingRating}
                 className="w-fit px-4 py-2 rounded-lg text-sm font-semibold
                 bg-yellow-500/20 text-yellow-400 border border-yellow-500/40
@@ -236,11 +282,15 @@ export default function ProductDetails({
 
         {/* Delivery Note */}
         <div className="m-5 w-11/12 rounded-xl border border-yellow-600/40 bg-yellow-600/10 p-4 text-sm text-yellow-300">
-          <span className="font-semibold">Note:</span> Make sure you contact the
-          seller about delivery immediately after placing an order. If the
-          seller does not respond within{" "}
-          <span className="font-semibold">48 hours</span>, open a dispute to be
-          refunded.
+          <span className="font-semibold">Important:</span> Ensure your email
+          address is correct and active. It will be used for direct
+          communication between you and the seller.
+          <br />
+          <br />
+          If the seller does not respond within{" "}
+          <span className="font-semibold">48 hours</span>, you may open a
+          dispute using this email to resolve the issue quickly or receive a
+          refund.
         </div>
       </div>
     </div>

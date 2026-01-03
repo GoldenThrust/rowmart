@@ -7,6 +7,7 @@ import { MarketplaceContractConfig } from "../marketPlace";
 import { MNEEContractConfig } from "../mnee";
 import { formatUnits, parseUnits } from "viem";
 import { useTokenDetails } from "./useTokenDetails";
+import { useAllowance } from "./useAllowance";
 
 // TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateProduct() {
@@ -28,15 +29,22 @@ export default function useCreateProduct() {
     functionName: "createProductFee",
   });
 
+  const { checkAllowance } = useAllowance();
+
   const approveAndCreate = async (price: string, metadataCID: string) => {
     if (!createProductFee) throw new Error("Fee not loaded");
+    const { sufficient, difference } = await checkAllowance(
+      createProductFee ?? BigInt(0)
+    );
 
-    // 1️⃣ Approve MNEE
-    await writeContractAsync({
-      ...MNEEContractConfig,
-      functionName: "approve",
-      args: [MarketplaceContractConfig.address, createProductFee],
-    });
+    if (!sufficient) {
+      // 1️⃣ Approve MNEE
+      await writeContractAsync({
+        ...MNEEContractConfig,
+        functionName: "approve",
+        args: [MarketplaceContractConfig.address, difference],
+      });
+    }
 
     // 2️⃣ Create Product
     await writeContractAsync({

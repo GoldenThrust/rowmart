@@ -19,14 +19,14 @@ const mongoosePlugin = fp(async (fastify, options) => {
     fastify.log.info("MongoDB connected");
 
     fastify.decorate("mongoose", mongoose);
+
+    fastify.addHook("onClose", async () => {
+      await mongoose.connection.close();
+    });
   } catch (err) {
     fastify.log.error(err);
-    process.exit(1);
+    fastify.close();
   }
-
-  fastify.addHook("onClose", async () => {
-    await mongoose.connection.close();
-  });
 });
 
 export default mongoosePlugin;
