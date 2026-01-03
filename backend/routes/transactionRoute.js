@@ -111,6 +111,8 @@ export default async function transactionRoute(fastify) {
                 });
             } catch (err) {
                 request.log.error(err);
+                console.log(err);
+
                 return reply
                     .status(500)
                     .send({ success: false, message: "Failed to get transactions" });

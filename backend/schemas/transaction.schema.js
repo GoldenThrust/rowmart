@@ -1,6 +1,26 @@
-import { productProperties } from "./product.schema.js";
-
 // Shared response schemas
+
+export const productProperties = {
+  _id: { type: "string" },
+  imageId: { type: "string" },
+  imageCid: { type: "string" },
+  name: { type: "string" },
+  email: { type: "string", format: "email" },
+  price: { type: "number", minimum: 0 },
+  seller: { type: "string" },
+  active: { type: "boolean" },
+
+  ratingCount: { type: "integer", minimum: 0 },
+  averageRating: { type: "number", minimum: 0, maximum: 5 },
+
+  description: { type: "string" },
+  productId: { type: "string" },
+
+  createdAt: { type: "string", format: "date-time" },
+  updatedAt: { type: "string", format: "date-time" }
+};
+
+
 const transactionProperties = {
   _id: { type: "string" },
   detailsId: { type: "string" },

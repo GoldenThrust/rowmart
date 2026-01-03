@@ -69,6 +69,7 @@ export default function DisplayProducts({
       toast("You can't buy your own product");
       return;
     }
+
     try {
       setDisableSubmit(true);
 

@@ -172,6 +172,8 @@ export default async function productRoutes(fastify, opts) {
             }
         }
     );
+
+
     // ---------------- RATE PRODUCT ----------------
     fastify.put(
         "/rate-product/:id",
@@ -181,60 +183,62 @@ export default async function productRoutes(fastify, opts) {
                 const { id } = request.params;
                 const { rating, comment, reviewer } = request.body;
 
-                const product = await Product.findById(id);
+                console.log(rating, comment, reviewer);
 
+                // 1. Find product
+                const product = await Product.findById(id);
                 if (!product) {
                     return reply.status(404).send({ message: "Product not found" });
                 }
 
+                // 2. Prevent seller from rating own product
                 if (product.seller === reviewer) {
                     return reply.status(403).send({
                         message: "You cannot rate your own product",
                     });
                 }
 
-                const existingRating = await Review.findOne({
+                // 3. Check if reviewer already rated this product
+                const existingReview = await Review.findOne({
                     reviewer,
-                    _id: { $in: product.reviews },
+                    product: id,
                 });
 
-                if (existingRating) {
+                if (existingReview) {
                     return reply.status(409).send({
                         message: "You have already rated this product",
                     });
                 }
 
-                const ratingDoc = await Review.create({
+                // 4. Create review
+                const review = await Review.create({
+                    product: id,
                     reviewer,
                     rating,
                     comment,
                 });
 
-                const updatedProduct = await Product.findByIdAndUpdate(
-                    id,
-                    {
-                        $push: { reviews: ratingDoc._id },
-                    },
-                    {
-                        new: true,
-                        runValidators: true,
-                    }
-                );
+                // 5. Attach review to product
+                await Product.findByIdAndUpdate(id, {
+                    $push: { reviews: review._id },
+                });
 
+                // 6. Recalculate rating statistics
                 const stats = await Review.aggregate([
-                    { $match: { _id: { $in: updatedProduct.reviews } } },
+                    { $match: { product: review.product } },
                     {
                         $group: {
-                            _id: null,
-                            avg: { $avg: "$reviews" },
-                            count: { $sum: 1 },
+                            _id: "$product",
+                            averageRating: { $avg: "$rating" },
+                            ratingCount: { $sum: 1 },
                         },
                     },
                 ]);
 
-                const averageRating = stats[0]?.avg || 0;
-                const ratingCount = stats[0]?.count || 0;
+                const averageRating = stats[0]?.averageRating || 0;
+                const ratingCount = stats[0]?.ratingCount || 0;
 
+                // 7. Update product stats
                 const finalProduct = await Product.findByIdAndUpdate(
                     id,
                     {
@@ -250,7 +254,17 @@ export default async function productRoutes(fastify, opts) {
                 });
             } catch (err) {
                 request.log.error(err);
-                return reply.status(500).send({ message: "Failed to rate product" });
+
+                // Handle duplicate key error (DB-level safety)
+                if (err.code === 11000) {
+                    return reply.status(409).send({
+                        message: "You have already rated this product",
+                    });
+                }
+
+                return reply.status(500).send({
+                    message: "Failed to rate product",
+                });
             }
         }
     );

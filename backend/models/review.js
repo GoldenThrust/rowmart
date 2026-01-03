@@ -1,27 +1,38 @@
 import { model, Schema } from "mongoose";
 
-const ratingSchema = new Schema({
-    rating: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 5,
-    },
-    comment: {
-        type: String,
-        trim: true,
-        maxlength: 500,
-    },
-    reviewer: {
-        type: String,
-        index: true,
-    },
-},
+const reviewSchema = new Schema(
     {
-        timestamps: true,
-    });
+        product: {
+            type: Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
+            index: true,
+        },
+        reviewer: {
+            type: String,
+            required: true,
+            index: true,
+        },
+        rating: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 5,
+        },
+        comment: {
+            type: String,
+            trim: true,
+            maxlength: 500,
+            required: true,
+        },
+    },
+    { timestamps: true }
+);
 
-ratingSchema.index({ reviewer: 1, product: 1 }, { unique: true });
-const Review = model("Review", ratingSchema);
+/**
+ * Prevent the same reviewer from rating the same product twice
+ */
+reviewSchema.index({ reviewer: 1, product: 1 }, { unique: true });
 
+const Review = model("Review", reviewSchema);
 export default Review;

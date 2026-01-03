@@ -1,8 +1,8 @@
 // Shared response schemas
 export const review = {
   reviewer: { type: "string" },
-  rating: { type: "string" },
-  comment: { type: "string" },
+  rating: { type: "number", minimum: 1, maximum: 5 },
+  comment: { type: "string", minLength: 1 }
 };
 
 export const productProperties = {
@@ -10,18 +10,28 @@ export const productProperties = {
   imageId: { type: "string" },
   imageCid: { type: "string" },
   name: { type: "string" },
-  email: { type: "string" },
-  price: { type: "string" },
+  email: { type: "string", format: "email" },
+  price: { type: "number", minimum: 0 },
   seller: { type: "string" },
   active: { type: "boolean" },
+
   reviews: {
     type: "array",
-    items: review
+    items: {
+      type: "object",
+      properties: review,
+      required: ["reviewer", "rating", "comment"]
+    }
   },
+
+  ratingCount: { type: "integer", minimum: 0 },
+  averageRating: { type: "number", minimum: 0, maximum: 5 },
+
   description: { type: "string" },
   productId: { type: "string" },
-  createdAt: { type: "string" },
-  updatedAt: { type: "string" }
+
+  createdAt: { type: "string", format: "date-time" },
+  updatedAt: { type: "string", format: "date-time" }
 };
 
 /* -----------------------------------------------------
@@ -212,12 +222,12 @@ export const rateProductSchema = {
         minimum: 1,
         maximum: 5,
       },
-      seller: {
-        type: "string"
+      comment: {
+        type: "string",
+        maxLength: 500,
       },
       reviewer: {
         type: "string",
-        maxLength: 500,
       },
     },
   },
