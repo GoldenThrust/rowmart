@@ -19,6 +19,8 @@ function App() {
 
   const readBalance = useReadBalance();
 
+  // Listen to product and transaction event and update on frontend update
+
   /* ----------------------- Watch Transfers ----------------------- */
 
   useWatchTokenTransfers(address, () => {

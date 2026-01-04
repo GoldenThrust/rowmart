@@ -7,11 +7,12 @@ import mongoosePlugin from "./plugins/mongoosePlugin.js"
 import ethersPlugin from "./plugins/ethersPlugin.js"
 import productRoutes from "./routes/productsRoute.js"
 import transactionRoute from "./routes/transactionRoute.js"
-import MailService from "./services/mailService.js"
+
+const isDev = process.env.DEV === "true";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.GATEWAY_URL
+  pinataGateway: process.env.PINATA_GATEWAY_URL
 })
 
 
@@ -42,18 +43,21 @@ await fastify.register(import('@fastify/multipart'), {
 })
 
 fastify.register(import('fastify-mailer'), {
-  defaults: { from: 'John Doe <mailer@rowmart.com>' },
+  defaults: { from: process.env.MAIL_FROM },
   transport: {
     host: process.env.MAIL_HOST,
     port: process.env.MAIL_PORT,
-    secure: false, // use TLS
-    // auth: {
-    //   user: process.env.MAIL_USERNAME,
-    //   pass: process.env.MAIL_PASSWORD,
-    // },
-    tls: {
-      rejectUnauthorized: false,
-    },
+    ...(isDev ? {
+      secure: false,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    } : {
+      auth: {
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+      },
+    }),
   }
 })
 
