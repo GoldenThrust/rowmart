@@ -14,6 +14,8 @@ export default function useCreateTransaction() {
     mutateAsync: writeContractAsync,
   } = useWriteContract();
 
+  const { mutateAsync: approvewriteContractAsync } = useWriteContract();
+
   const { isLoading, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -33,7 +35,7 @@ export default function useCreateTransaction() {
 
     if (!sufficient) {
       // 1️⃣ Approve MNEE
-      await writeContractAsync({
+      await approvewriteContractAsync({
         ...MNEEContractConfig,
         functionName: "approve",
         args: [MarketplaceContractConfig.address, difference],
