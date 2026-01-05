@@ -64,6 +64,7 @@ export default async function productRoutes(fastify, opts) {
                 // Save to MongoDB
                 const product = await Product.create({
                     ...fields,
+                    active: false,
                     imageId: id,
                     imageCid: cid,
                     productId: (productCount + 1n).toString(),
