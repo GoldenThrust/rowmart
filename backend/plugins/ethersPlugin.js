@@ -1,14 +1,18 @@
 import fp from "fastify-plugin";
 import { listenToEvents } from "../contract/services/Eventlistener.js";
-import { Contract } from "ethers";
+import { Contract, WebSocketProvider } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { MarketplaceContractConfig } from "../contract/marketPlace.js";
 import MailService from "../services/mailService.js";
 
 const ethersPlugin = fp(async function (fastify, opts) {
     try {
-        const provider = new JsonRpcProvider(opts.rpcUrl);
-        // const provider = new WebsocketProvider(opts.rpcUrl);
+        let provider;
+        if (opts.rpcUrl.startsWith("ws")) {
+            provider = new WebSocketProvider(opts.rpcUrl);
+        } else {
+            provider = new JsonRpcProvider(opts.rpcUrl);
+        }
     
         // Verify connection
         await provider.getBlockNumber();
