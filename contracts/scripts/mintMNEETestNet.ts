@@ -5,8 +5,6 @@ import process from "process";
 // --- 1. Connect to Sepolia ---
 const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
 
-console.log(process.env.WALLET_PRIVATE_KEY);
-// --- 2. Create deployer wallet (must be minter) ---
 const deployer = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY!, provider);
 
 // --- 3. Other accounts ---

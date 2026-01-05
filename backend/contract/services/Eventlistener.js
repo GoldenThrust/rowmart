@@ -170,15 +170,15 @@ export function listenToEvents(fastify) {
     //     }
     // );
 
-    const contracts = new Contract(
-        ...MNEEContractConfig,
-        provider
-    );
+    // const contracts = new Contract(
+    //     ...MNEEContractConfig,
+    //     provider
+    // );
 
-    contracts.on(
-        "Transfer",
-        async (from, to, value) => {
-            console.log(from, to, value);
-        }
-    );
+    // contracts.on(
+    //     "Transfer",
+    //     async (from, to, value) => {
+    //         console.log(from, to, value);
+    //     }
+    // );
 }

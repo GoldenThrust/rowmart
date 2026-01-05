@@ -15,6 +15,5 @@ const Token = await ethers.getContractAt(
 );
 
 for await (const signer of signers) {
-  console.log(signer.address);
   await Token.mint(signer.address, ethers.parseEther("1000"));
 }

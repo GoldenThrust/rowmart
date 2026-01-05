@@ -243,7 +243,6 @@ describe("Marketplace (UUPS)", function () {
     const uri = "ipfs://metadata";
 
     const balanceBefore = await Token.balanceOf(buyer.address);
-    console.log("Balance before:", ethers.formatEther(balanceBefore));
 
     const pricePerItem = ethers.parseEther("10");
     const amount = pricePerItem * BigInt(quantity);
@@ -257,10 +256,8 @@ describe("Marketplace (UUPS)", function () {
       .withArgs(1, 1, uri);
 
     const balanceAfter = await Token.balanceOf(buyer.address);
-    console.log("Balance after:", ethers.formatEther(balanceAfter), ethers.formatEther(balanceBefore - amount));
 
     expect(balanceAfter).to.equal(balanceBefore - amount);
-    console.log()
 
     // Validate transaction struct
     const txn = await marketplace.transactions(1);

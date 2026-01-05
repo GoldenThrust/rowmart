@@ -42,6 +42,5 @@ mongoose.connect("mongodb://0.0.0.0:27017/rowmart", {
     //     }
     // });
 }).catch((err) => {
-    console.error(err);
     process.exit(1);
 });

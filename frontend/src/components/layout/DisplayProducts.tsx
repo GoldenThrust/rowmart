@@ -47,8 +47,6 @@ export default function DisplayProducts({
           totalPages: res.data.meta.totalPages,
           total: res.data.meta.total,
         }));
-
-        console.log(pagination);
       })
       .catch((err) => console.error("Error fetching products:", err));
   }, [query, pagination.page]);

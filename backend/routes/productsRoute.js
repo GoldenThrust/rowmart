@@ -119,7 +119,6 @@ export default async function productRoutes(fastify, opts) {
                     products,
                 });
             } catch (err) {
-                console.error(err);
                 request.log.error(err);
                 return reply.status(500).send({ success: false, message: "Failed to get products" });
             }
@@ -182,8 +181,6 @@ export default async function productRoutes(fastify, opts) {
             try {
                 const { id } = request.params;
                 const { rating, comment, reviewer } = request.body;
-
-                console.log(rating, comment, reviewer);
 
                 // 1. Find product
                 const product = await Product.findById(id);

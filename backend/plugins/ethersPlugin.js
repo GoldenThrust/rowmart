@@ -36,7 +36,6 @@ const ethersPlugin = fp(async function (fastify, opts) {
             }
         });
     } catch(err) {
-        console.error(err);
         fastify.close();
     }
 });
