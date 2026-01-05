@@ -61,7 +61,7 @@ export default function CreateProduct({
         throw err;
       }
     } catch (err: any) {
-      toast.error(err?.message || "Listing failed", {
+      toast.error("Listing failed", {
         id: "create-product",
       });
     } finally {
