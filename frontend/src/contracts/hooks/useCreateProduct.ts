@@ -19,7 +19,7 @@ export default function useCreateProduct() {
   } = useWriteContract();
 
   const {
-    mutateAsync: approvewriteContractAsync,
+    mutateAsync: approveWriteContractAsync,
   } = useWriteContract();
 
   const { decimals } = useTokenDetails();
@@ -43,7 +43,7 @@ export default function useCreateProduct() {
 
     if (!sufficient) {
       // 1️⃣ Approve MNEE
-      await approvewriteContractAsync({
+      await approveWriteContractAsync({
         ...MNEEContractConfig,
         functionName: "approve",
         args: [MarketplaceContractConfig.address, difference],
