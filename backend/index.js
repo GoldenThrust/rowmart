@@ -72,6 +72,10 @@ fastify.register(ethersPlugin, {
 fastify.register(productRoutes);
 fastify.register(transactionRoute);
 
+fastify.get("/health", async () => {
+    return { status: "ok" };
+});
+
 fastify.get('/', function (_, reply) {
   reply.send({ hello: 'world' })
 })

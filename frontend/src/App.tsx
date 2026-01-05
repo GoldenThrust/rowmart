@@ -1,5 +1,5 @@
 import { useConnect, useConnection } from "wagmi";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import CreateProduct from "./components/layout/CreateProducts";
 import DisplayProducts from "./components/layout/DisplayProducts";
@@ -8,6 +8,20 @@ import { AccountConnectButton } from "./components/ui/ConnectButton";
 
 import useReadBalance from "./contracts/hooks/useReadBalance";
 import { useWatchTokenTransfers } from "./contracts/hooks/events/TransferEvents";
+import axios from "axios";
+
+async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
+  while (true) {
+    try {
+      const res = await axios.get("health");
+      if (res.data.status === "ok") {
+        setServerActive(true);
+        return;
+      }
+    } catch {}
+    await new Promise((r) => setTimeout(r, 7000));
+  }
+}
 
 function App() {
   const { address, isConnected } = useConnection();
@@ -16,10 +30,11 @@ function App() {
   const [openListingForm, setOpenListingForm] = useState(false);
   const [openOrderOverlay, setOpenOrderOverlay] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
+  const [serverActive, setServerActive] = useState(false);
 
   const readBalance = useReadBalance();
 
-  // Listen to product and transaction event and update on frontend update
+  // TODO: Listen to product and transaction event and update on frontend update
 
   /* ----------------------- Watch Transfers ----------------------- */
 
@@ -28,7 +43,25 @@ function App() {
     readBalance.refetchEthBalance();
   });
 
+  useEffect(() => {
+    wakeServer(setServerActive);
+  }, []);
+
   /* ----------------------------- UI ------------------------------ */
+
+  if (!serverActive)
+    return (
+      <div className="min-h-screen bg-neutral-950">
+        {/* Brand */}
+        <div className="p-5 flex items-center gap-3">
+          <img src="logo.png" alt="RowMart" className="w-8 h-8" />
+          <h1 className="text-xl font-semibold tracking-tight">RowMart</h1>
+        </div>
+        <div className="absolute top-1/2 left-1/2 -translate-1/2 text-neutral-500">
+          Server is starting. Please wait.
+        </div>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -38,9 +71,7 @@ function App() {
           {/* Brand */}
           <div className="flex items-center gap-3">
             <img src="logo.png" alt="RowMart" className="w-8 h-8" />
-            <h1 className="text-xl font-semibold tracking-tight">
-              RowMart
-            </h1>
+            <h1 className="text-xl font-semibold tracking-tight">RowMart</h1>
           </div>
 
           {/* Search */}
@@ -101,10 +132,7 @@ function App() {
         )}
 
         {/* Products */}
-        <DisplayProducts
-          query={searchQuery}
-          readBalance={readBalance}
-        />
+        <DisplayProducts query={searchQuery} readBalance={readBalance} />
       </main>
     </div>
   );
