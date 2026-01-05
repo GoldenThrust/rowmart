@@ -1,57 +1,109 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+# 🔗 Rowmart Smart Contracts (Hardhat)
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+The **Rowmart smart contracts** power the core decentralized logic of the marketplace. They handle **product creation, purchases, escrow, and Transaction lifecycle management** in a trustless and transparent manner.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+All contracts are developed, tested, and deployed using **Hardhat**.
 
-## Project Overview
+## Table of Content
+- [🔗 Rowmart Smart Contracts (Hardhat)](#-rowmart-smart-contracts-hardhat)
+  - [Table of Content](#table-of-content)
+  - [🧠 Contract Responsibilities](#-contract-responsibilities)
+  - [🛠️ Tech Stack](#️-tech-stack)
+  - [⚙️ Environment Variables](#️-environment-variables)
+  - [🚀 Getting Started](#-getting-started)
+  - [🚢 Deployment](#-deployment)
+  - [🟡 Mint Mock MNEE](#-mint-mock-mnee)
+  - [🧪 Testing](#-testing)
+  - [🔐 Security Considerations](#-security-considerations)
 
-This example project includes:
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+## 🧠 Contract Responsibilities
 
-## Usage
+- Product listing & ownership  
+- Secure on-chain purchases  
+- Escrow handling  
+- Transactiono lifecycle management  
+- Event emission for backend  
 
-### Running Tests
+## 🛠️ Tech Stack
 
-To run all the tests in the project, execute the following command:
+- **Language:** [![Solidity](https://img.shields.io/badge/Solidity-363636?style=flat&logo=solidity&logoColor=white)](https://soliditylang.org)    
+- **Framework:** [![Hardhat](https://img.shields.io/badge/Hardhat-FF3C00?style=flat&logo=hardhat&logoColor=white)](https://hardhat.org)  
+- **Libraries:** [![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-000?style=flat&logo=openzeppelin)](https://openzeppelin.com/)  
+- **Network:** [![Ethereum (Sepolia Testnet)](https://img.shields.io/badge/Ethereum%20(Sepolia%20Testnet)-000?style=flat&logo=ethereum)](https://openzeppelin.com/)
+  
+## ⚙️ Environment Variables
 
-```shell
-npx hardhat test
-```
+Rename the .env.example file to .env in the contract directory and update the environment variables with the appropriate values.
 
-You can also selectively run the Solidity or `mocha` tests:
+## 🚀 Getting Started
+1. Install dependencies
+    ```
+    cd contracts
+    npm install
+    ```
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
+2. Compile contracts
+   ```bash
+    npx hardhat compile
+    ```
 
-### Make a deployment to Sepolia
+3. Run tests 
+    ```
+    npx hardhat test
+    ```
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+## 🚢 Deployment
+1. Deploy the smart contracts to the desired network:
+    ```bash
+    # Local development network
+    npx hardhat run scripts/deploy.ts --network localhost
 
-To run the deployment to a local chain:
+    # Sepolia testnet
+    npx hardhat run scripts/deploy.ts --network sepolia
 
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
+    # Ethereum mainnet (you have to uncomment the mainnet configuration in hardhat.config.ts)
+    npx hardhat run scripts/deploy.ts --network mainnet
+    ```
+2. Verify contract
+    ```bash
+    npx hardhat verify --network sepolia DEPLOYED_CONTRACT_ADDRESS
+    ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `WALLET_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+## 🟡 Mint Mock MNEE
+1. Add your wallet address to the `buyers` array in `scripts/mintMNEETestNet.ts`:
+    ```js
+    const buyer = [
+        // YOUR_WALLET_ADDRESS
+    ]
+    ```
+2. Run the minting script:
+    ```bash
+    npx hardhat run scripts/mintMNEETestNet.ts
+    ```
 
-You can set the `WALLET_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+## 🧪 Testing
 
-To set the `WALLET_PRIVATE_KEY` config variable using `hardhat-keystore`:
+Unit tests cover:
 
-```shell
-npx hardhat keystore set WALLET_PRIVATE_KEY
-```
+- Product creation
 
-After setting the variable, you can run the deployment with the Sepolia network:
+- Purchases & escrow
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+- Order completion & disputes
+
+- Uses Hardhat + Chai.
+
+## 🔐 Security Considerations
+
+- Uses OpenZeppelin guards
+
+- Prevents re-entrancy
+
+- Validates order states
+
+- No admin custody of user funds
+
+📜 License
+
+MIT License

@@ -20,7 +20,7 @@ const buyers = [
 
 // --- 4. Get contract instance ---
 const Token = new ethers.Contract(
-  "0x6247E28B65fFDd7e75823F0b580919dB8B01B0c6",
+  process.env.MNEE_ADDRESS!,
   [
     "function mint(address to, uint256 amount) external",
     "function balanceOf(address account) view returns (uint256)",
