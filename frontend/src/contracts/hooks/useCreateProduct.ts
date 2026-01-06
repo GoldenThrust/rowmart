@@ -18,10 +18,6 @@ export default function useCreateProduct() {
     mutateAsync: writeContractAsync,
   } = useWriteContract();
 
-  const {
-    mutateAsync: approveWriteContractAsync,
-  } = useWriteContract();
-
   const { decimals } = useTokenDetails();
 
   const { isLoading, isSuccess } = useWaitForTransactionReceipt({
@@ -43,19 +39,21 @@ export default function useCreateProduct() {
 
     if (!sufficient) {
       // 1️⃣ Approve MNEE
-      await approveWriteContractAsync({
+      await writeContractAsync({
         ...MNEEContractConfig,
         functionName: "approve",
         args: [MarketplaceContractConfig.address, difference],
       });
     }
 
-    // 2️⃣ Create Product
-    await writeContractAsync({
-      ...MarketplaceContractConfig,
-      functionName: "createProduct",
-      args: [parseUnits(price, decimals!), metadataCID],
-    });
+    setTimeout(async () => {
+      // 2️⃣ Create Product
+      await writeContractAsync({
+        ...MarketplaceContractConfig,
+        functionName: "createProduct",
+        args: [parseUnits(price, decimals!), metadataCID],
+      });
+    }, sufficient ? 0 : 1500);
   };
 
   return {

@@ -14,11 +14,10 @@ export default function useCreateTransaction() {
     mutateAsync: writeContractAsync,
   } = useWriteContract();
 
-  const { mutateAsync: approveWriteContractAsync } = useWriteContract();
-
   const { isLoading, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
+
   const { decimals = 18 } = useTokenDetails();
 
   const { checkAllowance } = useAllowance();
@@ -35,19 +34,24 @@ export default function useCreateTransaction() {
 
     if (!sufficient) {
       // 1️⃣ Approve MNEE
-      await approveWriteContractAsync({
+      await writeContractAsync({
         ...MNEEContractConfig,
         functionName: "approve",
         args: [MarketplaceContractConfig.address, difference],
       });
     }
 
-    // 2️⃣ Create Transaction
-    await writeContractAsync({
-      ...MarketplaceContractConfig,
-      functionName: "buyProduct",
-      args: [productId, quantity, metadataCID],
-    });
+    setTimeout(
+      async () => {
+        // 2️⃣ Create Transaction
+        await writeContractAsync({
+          ...MarketplaceContractConfig,
+          functionName: "buyProduct",
+          args: [productId, quantity, metadataCID],
+        });
+      },
+      sufficient ? 0 : 1500
+    );
   };
 
   return {
