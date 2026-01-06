@@ -46,14 +46,14 @@ export default function useCreateProduct() {
       });
     }
 
-    setTimeout(async () => {
+    // setTimeout(async () => {
       // 2️⃣ Create Product
       await writeContractAsync({
         ...MarketplaceContractConfig,
         functionName: "createProduct",
         args: [parseUnits(price, decimals!), metadataCID],
       });
-    }, sufficient ? 0 : 1500);
+    // }, sufficient ? 0 : 1500);
   };
 
   return {

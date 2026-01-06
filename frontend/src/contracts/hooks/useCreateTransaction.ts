@@ -41,17 +41,14 @@ export default function useCreateTransaction() {
       });
     }
 
-    setTimeout(
-      async () => {
+    // setTimeout(async () => {
         // 2️⃣ Create Transaction
         await writeContractAsync({
           ...MarketplaceContractConfig,
           functionName: "buyProduct",
           args: [productId, quantity, metadataCID],
         });
-      },
-      sufficient ? 0 : 1500
-    );
+      // }, sufficient ? 0 : 1500);
   };
 
   return {
