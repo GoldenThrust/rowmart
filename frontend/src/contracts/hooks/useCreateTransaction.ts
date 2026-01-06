@@ -4,6 +4,7 @@ import { MNEEContractConfig } from "../mnee";
 import { useTokenDetails } from "./useTokenDetails";
 import { parseUnits } from "viem";
 import { useAllowance } from "./useAllowance";
+import { sleep } from "../../utils";
 
 // TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateTransaction() {
@@ -39,16 +40,16 @@ export default function useCreateTransaction() {
         functionName: "approve",
         args: [MarketplaceContractConfig.address, difference],
       });
+
+      await sleep(1500);
     }
 
-    // setTimeout(async () => {
-        // 2️⃣ Create Transaction
-        await writeContractAsync({
-          ...MarketplaceContractConfig,
-          functionName: "buyProduct",
-          args: [productId, quantity, metadataCID],
-        });
-      // }, sufficient ? 0 : 1500);
+    // 2️⃣ Create Transaction
+    await writeContractAsync({
+      ...MarketplaceContractConfig,
+      functionName: "buyProduct",
+      args: [productId, quantity, metadataCID],
+    });
   };
 
   return {
