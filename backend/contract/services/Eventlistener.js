@@ -13,6 +13,7 @@ export function listenToEvents(fastify) {
             console.log("ProductCreated event detected:", { productId, seller, uri });
             try {
                 const product = await Product.findOneAndUpdate({ seller, imageCid: uri }, { productId: productId.toString(), active: true }, { new: true });
+                console.log(product)
                 await mailservice.sendProductCreationMail(product.email, seller, product);
             } catch (error) {
                 fastify.log.error("Error handling ProductCreated event:", error);
