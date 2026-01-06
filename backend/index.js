@@ -7,6 +7,7 @@ import mongoosePlugin from "./plugins/mongoosePlugin.js"
 import ethersPlugin from "./plugins/ethersPlugin.js"
 import productRoutes from "./routes/productsRoute.js"
 import transactionRoute from "./routes/transactionRoute.js"
+import Product from "./models/product.js"
 
 const isDev = process.env.DEV === "true";
 
@@ -43,23 +44,19 @@ await fastify.register(import('@fastify/multipart'), {
 })
 
 fastify.register(import('fastify-mailer'), {
-  defaults: { from: process.env.MAIL_FROM },
+  defaults: {
+    from: process.env.MAIL_FROM,
+  },
   transport: {
-    host: process.env.MAIL_HOST,
-    port: process.env.MAIL_PORT,
-    ...(isDev ? {
-      secure: false,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    } : {
-      auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
-      },
-    }),
-  }
-})
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.MAIL_USERNAME,
+      pass: process.env.MAIL_PASSWORD,
+    },
+  },
+});
 
 fastify.register(mongoosePlugin, {
   uri: process.env.MONGO_URI,
@@ -73,13 +70,20 @@ fastify.register(productRoutes);
 fastify.register(transactionRoute);
 
 fastify.get("/health", async () => {
-    return { status: "ok" };
+  return { status: "ok" };
 });
 
 fastify.get('/', function (_, reply) {
   reply.send({ hello: 'world' })
 })
 
+fastify.get("/send-mail", async () => {
+  const { mailservice } = fastify;
+
+  const product = await Product.find({ productId: 1 });
+
+  await mailservice.sendProductCreationMail("adenijiolajid01@gmail.com", "John", product);
+})
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
   if (err) {

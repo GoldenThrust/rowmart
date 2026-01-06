@@ -32,7 +32,7 @@ The **Rowmart frontend** is a Web3-enabled marketplace interface that allows use
 
 ## ✨ Features
 
-- Wallet connection (**MetaMask** | **WalletConnect** | **Rainbow**)  
+- Wallet connection (**MetaMask** | **Coinbase** | **Rainbow** | **WalletConnect**)  
 - Product listing & browsing  
 - Secure **on-chain purchases**  
 - Order tracking & escrow status  
