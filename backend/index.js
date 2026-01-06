@@ -77,12 +77,13 @@ fastify.get('/', function (_, reply) {
   reply.send({ hello: 'world' })
 })
 
-fastify.get("/send-mail", async () => {
+fastify.get("/send-mail", async (_, reply) => {
   const { mailservice } = fastify;
 
   const product = await Product.find({ productId: 1 });
 
   await mailservice.sendProductCreationMail("adenijiolajid01@gmail.com", "John", product);
+  return reply.send({ success: true })
 })
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
