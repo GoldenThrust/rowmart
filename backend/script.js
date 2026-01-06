@@ -52,6 +52,6 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 
-const res = await fetch("https://rowmart.onrender.com/send-mail");
+const res = await fetch("http://127.0.0.1:3000/send-mail");
 const data = await res.json();
 console.log(data);

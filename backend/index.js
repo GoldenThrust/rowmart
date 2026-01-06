@@ -8,8 +8,7 @@ import ethersPlugin from "./plugins/ethersPlugin.js"
 import productRoutes from "./routes/productsRoute.js"
 import transactionRoute from "./routes/transactionRoute.js"
 import Product from "./models/product.js"
-
-const isDev = process.env.DEV === "true";
+import mailerPlugin from "./plugins/mailer.js"
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -43,20 +42,7 @@ await fastify.register(import('@fastify/multipart'), {
   },
 })
 
-fastify.register(import('fastify-mailer'), {
-  defaults: {
-    from: process.env.MAIL_FROM,
-  },
-  transport: {
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.MAIL_USERNAME,
-      pass: process.env.MAIL_PASSWORD,
-    },
-  },
-});
+fastify.register(mailerPlugin);
 
 fastify.register(mongoosePlugin, {
   uri: process.env.MONGO_URI,
@@ -87,10 +73,6 @@ fastify.get("/send-mail", async (_, reply) => {
 })
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
-  fastify.ready(async () => {
-    await fastify.mailer.verify();
-    console.log("SMTP connection ready");
-  });
   if (err) {
     fastify.log.error(err)
     process.exit(1)

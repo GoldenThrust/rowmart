@@ -3,7 +3,6 @@ import { listenToEvents } from "../contract/services/Eventlistener.js";
 import { Contract, WebSocketProvider } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { MarketplaceContractConfig } from "../contract/marketPlace.js";
-import MailService from "../services/mailService.js";
 
 const ethersPlugin = fp(async function (fastify, opts) {
     try {
@@ -23,8 +22,6 @@ const ethersPlugin = fp(async function (fastify, opts) {
         );
     
         fastify.decorate("ethers", { provider, contract });
-    
-        fastify.decorate("mailservice", (new MailService(fastify.mailer, "RowMart")));
     
         listenToEvents(fastify);
     
