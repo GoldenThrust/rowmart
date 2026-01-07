@@ -27,6 +27,13 @@
     "@vitejs/plugin-react": "latest",
     "@wagmi/cli": "latest",
     "typescript": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "@base-org/account": "^2.5.1",
+    "@gemini-wallet/core": "^0.3.2",
+    "@metamask/sdk": "^0.33.1",
+    "@safe-global/safe-apps-provider": "^0.18.6",
+    "@safe-global/safe-apps-sdk": "^9.1.0",
+    "@walletconnect/ethereum-provider": "^2.23.1",
+    "porto": "^0.2.37"
   }
 }

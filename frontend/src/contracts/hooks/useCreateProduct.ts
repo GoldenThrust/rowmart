@@ -8,7 +8,6 @@ import { MNEEContractConfig } from "../mnee";
 import { formatUnits, parseUnits } from "viem";
 import { useTokenDetails } from "./useTokenDetails";
 import { useAllowance } from "./useAllowance";
-import { sleep } from "../../utils";
 
 // TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateProduct() {
@@ -45,8 +44,6 @@ export default function useCreateProduct() {
         functionName: "approve",
         args: [MarketplaceContractConfig.address, difference],
       });
-
-      await sleep(1500);
     }
 
     // 2️⃣ Create Product
