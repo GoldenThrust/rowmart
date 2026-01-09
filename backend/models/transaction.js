@@ -44,8 +44,13 @@ const transactionSchema = new Schema({
         type: String,
         default: "pending",
         enum: ["pending", "disputed", "completed", "refunded"]
+    },
+    success: {
+        type: Boolean,
+        default: true
     }
 }, { timestamps: true });
+transactionSchema.index({ success: 1, createdAt: 1 });
 
 const Transaction = model("Transaction", transactionSchema);
 

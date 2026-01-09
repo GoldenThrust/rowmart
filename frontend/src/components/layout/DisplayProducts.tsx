@@ -35,6 +35,7 @@ export default function DisplayProducts({
     axios
       .get("/get-products", {
         params: {
+          active: true,
           search: query ?? undefined,
           page: pagination.page,
         },

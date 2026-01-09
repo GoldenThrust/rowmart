@@ -54,6 +54,7 @@ const productSchema = new Schema({
     }
 }, { timestamps: true });
 
+productSchema.index({ active: 1, createdAt: 1 });
 const Product = model("Product", productSchema);
 // TODO: price range filter
 

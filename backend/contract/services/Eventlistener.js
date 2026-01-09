@@ -30,6 +30,7 @@ export function listenToEvents(fastify) {
 
                 const transaction = await Transaction.findOneAndUpdate({ product, detailsCid: uri }, {
                     transactionId: txnId.toString(),
+                    success: true
                 }, { new: true });
 
 

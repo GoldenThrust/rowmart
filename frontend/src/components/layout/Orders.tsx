@@ -128,6 +128,7 @@ export default function Orders({
 
         const res = await axios.get("/get-transactions", {
           params: {
+            success: true,
             address,
             isSeller,
             status: status === "all" ? undefined : status,

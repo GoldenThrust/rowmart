@@ -31,6 +31,7 @@ export default async function transactionRoute(fastify) {
                     detailsId: id,
                     detailsCid: cid,
                     transactionId: (transactionCount + 1n).toString(),
+                    success: false
                 });
 
                 return reply.send({ success: true, transaction });
@@ -70,12 +71,13 @@ export default async function transactionRoute(fastify) {
                     address,
                     status,
                     isSeller,
+                    success,
                 } = request.query;
 
                 const pageNum = Number(page);
                 const limitNum = Number(limit);
 
-                const query = {};
+                const query = { success };
 
                 if (status) {
                     query.status = status;

@@ -74,7 +74,7 @@ export default function CreateProduct({
       <div className="relative w-full max-w-md bg-neutral-950 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 sticky top-0 bg-neutral-950 z-10">
-          <h2 className="text-lg font-semibold text-white">List New Product</h2>
+          <h2 className="text-lg font-semibold text-white">List New Product/Services</h2>
           <X
             onClick={() => setOpenListingForm(false)}
             className="cursor-pointer text-gray-400 hover:text-red-500"
@@ -89,7 +89,7 @@ export default function CreateProduct({
         >
           <input
             name="name"
-            placeholder="Product name"
+            placeholder="Name"
             required
             className="w-full h-11 rounded-lg bg-neutral-950 border border-neutral-700 px-4 text-sm text-white
              focus:outline-none focus:border-emerald-500"
@@ -109,7 +109,7 @@ export default function CreateProduct({
           {/* Image Upload */}
           <label className="group flex flex-col items-center justify-center gap-2 border border-dashed border-neutral-700 rounded-xl p-4 cursor-pointer hover:border-emerald-500 transition">
             <Upload className="text-gray-400 group-hover:text-emerald-400" />
-            <span className="text-sm text-gray-400">Upload product image</span>
+            <span className="text-sm text-gray-400">Upload image</span>
             <input
               type="file"
               name="image"
@@ -151,7 +151,7 @@ export default function CreateProduct({
 
           <textarea
             name="description"
-            placeholder="Short product description"
+            placeholder="Short description"
             required
             className="w-full rounded-lg bg-neutral-950 border border-neutral-700 p-4 text-sm text-white
              focus:outline-none focus:border-emerald-500 h-24 resize-none"
@@ -180,7 +180,7 @@ export default function CreateProduct({
                 : "bg-red-600 text-white cursor-not-allowed"
             }`}
           >
-            {submitting || isPending ? "Listing…" : "List Product"}
+            {submitting || isPending ? "Listing…" : "List Now"}
           </button>
         </form>
       </div>
