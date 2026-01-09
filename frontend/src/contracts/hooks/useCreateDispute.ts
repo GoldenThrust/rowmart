@@ -16,7 +16,7 @@ export default function createDispute() {
     hash,
   });
 
-  const createDispute = async (id: string,) => {
+  const createDispute = async (id: string) => {
     await writeContractAsync({
       ...MarketplaceContractConfig,
       functionName: "openDispute",

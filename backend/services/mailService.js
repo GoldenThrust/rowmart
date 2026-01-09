@@ -64,7 +64,7 @@ export default class MailService {
         buyerEmail,
         product,
         quantity,
-        totalPrice,) {
+        totalPrice) {
         const html = await TemplateEngine.render("purchase-seller", {
             PLATFORM_NAME: this.appName,
             PRODUCT_NAME: product.name,
