@@ -1,8 +1,5 @@
 // import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import {
-  createConfig,
-  http,
-} from "wagmi";
+import { createConfig, http, webSocket } from "wagmi";
 import {
   mainnet,
   sepolia,
@@ -23,7 +20,18 @@ import {
 //   // baseAccount,
 // } from "wagmi/connectors";
 
-const rpc = (url?: string) => (url && url.trim() ? http(url) : http());
+
+export const rpc = (url?: string) => {
+  if (!url || !url.trim()) {
+    return http();
+  }
+
+  if (url.startsWith("ws://") || url.startsWith("wss://")) {
+    return webSocket(url);
+  }
+
+  return http(url);
+};
 
 // const appUrl =
 //   typeof window !== "undefined"
@@ -36,7 +44,7 @@ export const config = createConfig({
   // projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID,
   // appUrl,
   // appDescription:
-    // "Rowmart is a decentralized marketplace that connects creators, sellers and buyers using smart contracts. It features a modern frontend, a secure backend API, and Ethereum smart contracts for trustless product listing, purchasing, and dispute handling.",
+  // "Rowmart is a decentralized marketplace that connects creators, sellers and buyers using smart contracts. It features a modern frontend, a secure backend API, and Ethereum smart contracts for trustless product listing, purchasing, and dispute handling.",
   // connectors: [
   //   metaMask({
   //     dappMetadata: {
