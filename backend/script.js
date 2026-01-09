@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // import { JsonRpcProvider } from "ethers";
 // import { MarketplaceContractConfig } from "./contract/marketPlace.js";
 import Product from "./models/product.js";
-// import Transaction from "./models/transaction.js";
+import Transaction from "./models/transaction.js";
 import "dotenv/config"
 
 import { createTransport } from "nodemailer";
@@ -20,8 +20,9 @@ mongoose.connect(process.env.MONGO_URI, {
     //     provider
     // );
 
-    // const transactions = await Transaction.find({});
+    const transactions = await Transaction.findOne({ transactionId: 1});
 
+    console.log(transactions)
     // transactions.forEach(async (transaction) => {
     //     try {
     // const onChainTransaction = await contract.transactions(transaction.transactionId);
@@ -31,9 +32,9 @@ mongoose.connect(process.env.MONGO_URI, {
     //         console.error(`Failed to update transaction ${transaction.transactionId}:`, err);
     //     }
     // });
-    const products = await Product.find({});
+    // const products = await Product.find({});
 
-    products.forEach(async (product) => {
+    // products.forEach(async (product) => {
         // console.log(product);
         //     try {
         //         const onChainProduct = await contract.products(product.productId);
@@ -46,7 +47,8 @@ mongoose.connect(process.env.MONGO_URI, {
         //     }
 
         // process.exit(0);
-    });
+    // });
+
 }).catch((err) => {
     process.exit(1);
 });

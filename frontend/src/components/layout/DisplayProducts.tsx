@@ -4,23 +4,18 @@ import ProductDetails from "../ui/ProductDetails";
 import { useConnection } from "wagmi";
 import toast from "react-hot-toast";
 import useCreateTransaction from "../../contracts/hooks/useCreateTransaction";
-import useReadBalance from "../../contracts/hooks/useReadBalance";
 
 /* --------------------------- Component --------------------------- */
 
-export default function DisplayProducts({
-  query,
-  readBalance,
-}: {
-  query: string | null;
-  readBalance: ReturnType<typeof useReadBalance>;
-}) {
+export default function DisplayProducts({ query }: { query: string | null }) {
   const { address } = useConnection();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [disableSubmit, setDisableSubmit] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [createTransactionSeccessful, setCreateTransactionSeccessful] =
+    useState(false);
   const [pagination, setPagination] = useState<PaginationMeta>({
     page: 1,
     totalPages: 1,
@@ -56,6 +51,21 @@ export default function DisplayProducts({
     setPagination((p) => ({ ...p, page: 1 }));
   }, [query]);
 
+  useEffect(() => {
+    if (disableSubmit === false) return;
+
+    if (createTransactionSeccessful) {
+      toast.success("Purchase successful", { id: "buy-product" });
+    } else {
+      toast.error("Blockchain transaction failed", {
+        id: "buy-product",
+      });
+    }
+    setDisableSubmit(false);
+    setSelectedProduct(null);
+    setCreateTransactionSeccessful(false);
+  }, [createTransactionSeccessful]);
+
   /* --------------------------- Buy Flow --------------------------- */
 
   const buyProduct = async (
@@ -85,7 +95,7 @@ export default function DisplayProducts({
 
       localStorage.setItem("user-email", buyerEmail);
 
-      const { _id, detailsCid } = res.data.transaction;
+      const { detailsCid } = res.data.transaction;
 
       try {
         if (!product.productId || Number(product.productId) <= 0) {
@@ -96,29 +106,16 @@ export default function DisplayProducts({
           BigInt(product.productId),
           quantity,
           detailsCid,
-          price.toString()
+          price.toString(),
+          setCreateTransactionSeccessful
         );
-
-        readBalance.refetchBalance();
-        readBalance.refetchEthBalance();
-
-        toast.success("Purchase successful", { id: "buy-product" });
-      } catch (err) {
-        await axios.delete("/delete-transaction", {
-          data: { id: _id },
-        });
-
-        toast.error("Blockchain transaction failed", {
-          id: "buy-product",
-        });
+      } catch (_) {
+        setCreateTransactionSeccessful(false);
       }
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Transaction failed", {
         id: "buy-product",
       });
-    } finally {
-      setDisableSubmit(false);
-      setSelectedProduct(null);
     }
   };
 

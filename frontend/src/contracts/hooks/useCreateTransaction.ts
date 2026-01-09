@@ -4,9 +4,13 @@ import { MNEEContractConfig } from "../mnee";
 import { useTokenDetails } from "./useTokenDetails";
 import { parseUnits } from "viem";
 import { useAllowance } from "./useAllowance";
+import { useTaskQueue } from "../../store/useTaskQueue";
+import { Dispatch, SetStateAction } from "react";
 
 // TODO: estimate gas price to decide if user can pray and approve transaction
 export default function useCreateTransaction() {
+  const { enqueue } = useTaskQueue();
+
   const {
     data: hash,
     error,
@@ -26,27 +30,38 @@ export default function useCreateTransaction() {
     productId: bigint,
     quantity: number,
     metadataCID: string,
-    price: string
+    price: string,
+    setCreateTransactionSeccessful: Dispatch<SetStateAction<boolean>>
   ) => {
-    const { sufficient, difference } = await checkAllowance(
+    const { sufficient } = await checkAllowance(
       parseUnits(price, decimals)
     );
+
+    const createTransaction = async () => {
+      try {
+        await writeContractAsync({
+          ...MarketplaceContractConfig,
+          functionName: "buyProduct",
+          args: [productId, quantity, metadataCID],
+        });
+        setCreateTransactionSeccessful(true);
+      } catch (_) {
+        setCreateTransactionSeccessful(false);
+      }
+    };
 
     if (!sufficient) {
       // 1️⃣ Approve MNEE
       await writeContractAsync({
         ...MNEEContractConfig,
         functionName: "approve",
-        args: [MarketplaceContractConfig.address, difference],
+        args: [MarketplaceContractConfig.address, parseUnits(price, decimals)],
       });
+      // 2️⃣ Create Transaction
+      enqueue(createTransaction);
+    } else {
+      createTransaction();
     }
-
-    // 2️⃣ Create Transaction
-    await writeContractAsync({
-      ...MarketplaceContractConfig,
-      functionName: "buyProduct",
-      args: [productId, quantity, metadataCID],
-    });
   };
 
   return {

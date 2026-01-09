@@ -18,6 +18,8 @@ export default function CreateProduct({
   const [userEmail, setUserEmail] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [createProductSeccessful, setCreateProductSeccessful] =
+    useState(false);
 
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
   const { formatedBalance } = readBalance;
@@ -30,6 +32,23 @@ export default function CreateProduct({
   useEffect(() => {
     setUserEmail(localStorage.getItem("user-email") ?? "");
   }, []);
+
+  useEffect(() => {
+    if (submitting === false) return;
+
+    if (createProductSeccessful) {
+      toast.success("Product listed successfully!", {
+        id: "create-product",
+      });
+    } else {
+      toast.error("Blockchain Listing failed", {
+        id: "create-product",
+      });
+    }
+    setSubmitting(false);
+    setOpenListingForm(false);
+    setCreateProductSeccessful(false);
+  }, [createProductSeccessful]);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,26 +65,19 @@ export default function CreateProduct({
       formData.append("seller", address);
 
       const res = await axios.post("/create-product", formData);
-      const { _id, imageCid } = res.data.product;
+      const { imageCid } = res.data.product;
 
       localStorage.setItem("user-email", formData.get("email") as string);
 
       try {
-        await approveAndCreate(price!, imageCid);
-        toast.success("Product listed successfully!", {
-          id: "create-product",
-        });
-        setOpenListingForm(false);
+        await approveAndCreate(price!, imageCid, setCreateProductSeccessful);
       } catch (err: any) {
-        await axios.delete("/delete-product", { data: { id: _id } });
-        throw err;
+        setCreateProductSeccessful(false);
       }
     } catch (err: any) {
       toast.error("Listing failed", {
         id: "create-product",
       });
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -74,7 +86,9 @@ export default function CreateProduct({
       <div className="relative w-full max-w-md bg-neutral-950 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 sticky top-0 bg-neutral-950 z-10">
-          <h2 className="text-lg font-semibold text-white">List New Product/Services</h2>
+          <h2 className="text-lg font-semibold text-white">
+            List New Product/Services
+          </h2>
           <X
             onClick={() => setOpenListingForm(false)}
             className="cursor-pointer text-gray-400 hover:text-red-500"

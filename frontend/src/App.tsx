@@ -9,6 +9,7 @@ import { AccountConnectButton } from "./components/ui/ConnectButton";
 import useReadBalance from "./contracts/hooks/useReadBalance";
 import { useWatchTokenTransfers } from "./contracts/hooks/events/TransferEvents";
 import axios from "axios";
+import { useWatchTokenApproval } from "./contracts/hooks/events/ApprovalEvents";
 
 async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
   while (true) {
@@ -24,7 +25,7 @@ async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
 }
 
 function App() {
-  const { address, isConnected } = useConnection();
+  const { address, isConnected, } = useConnection();
   const { error } = useConnect();
 
   const [openListingForm, setOpenListingForm] = useState(false);
@@ -42,6 +43,8 @@ function App() {
     readBalance.refetchBalance();
     readBalance.refetchEthBalance();
   });
+
+  useWatchTokenApproval(address);
 
   useEffect(() => {
     wakeServer(setServerActive);
@@ -100,7 +103,7 @@ function App() {
                 onClick={() => setOpenListingForm(true)}
                 className="bg-emerald-600 hover:bg-emerald-500 text-sm px-4 py-2 rounded-lg font-medium transition"
               >
-                Sell Product
+                Sell Now
               </button>
             )}
           </div>
@@ -132,7 +135,7 @@ function App() {
         )}
 
         {/* Products */}
-        <DisplayProducts query={searchQuery} readBalance={readBalance} />
+        <DisplayProducts query={searchQuery} />
       </main>
     </div>
   );
