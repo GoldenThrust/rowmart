@@ -19,8 +19,5 @@
   "bugs": {
     "url": "https://github.com/GoldenThrust/rowmart/issues"
   },
-  "homepage": "https://github.com/GoldenThrust/rowmart#readme",
-  "dependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.55.1"
-  }
+  "homepage": "https://github.com/GoldenThrust/rowmart#readme"
 }
