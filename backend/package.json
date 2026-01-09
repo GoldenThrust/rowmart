@@ -25,6 +25,7 @@
     "mongoose": "^9.0.2",
     "nodemailer": "^7.0.12",
     "pinata": "^2.5.2",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.6.1"
   }
 }
