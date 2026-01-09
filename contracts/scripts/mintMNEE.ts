@@ -1,19 +1,20 @@
 import { network } from "hardhat";
 
-const { ethers } = await network.connect({
-  network: "hardhatOp",
-  chainType: "op",
-});
+const { ethers } = await network.connect();
 
-const [owner, seller, buyer, feeRecipient, arbitrator, other] =
-  await ethers.getSigners();
-const signers = [owner, seller, buyer, feeRecipient, arbitrator, other];
-const Token = await ethers.getContractAt(
-  "MockMNEE",
-  "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-  owner
+const signers =  await ethers.getSigners();
+
+const Token = new ethers.Contract(
+  process.env.MNEE_ADDRESS!,
+  [
+    "function mint(address to, uint256 amount) external",
+    "function balanceOf(address account) view returns (uint256)",
+  ],
+  signers[0]
 );
 
+
 for await (const signer of signers) {
-  await Token.mint(signer.address, ethers.parseEther("1000"));
+  console.log(signer.address);
+  await Token.mint(signer.address, ethers.parseEther(((Math.random() * 1000 - 100) + 100).toString()));
 }
