@@ -3,7 +3,7 @@ import MailService from "../services/mailService.js";
 import { createTransport } from "nodemailer";
 
 
-const mailerPlugin = fp(async (fastify, options) => {
+const mailerPlugin = fp(async (fastify) => {
   const transporter = createTransport({
     host: process.env.MAIL_HOST,
     port: Number(process.env.MAIL_PORT),

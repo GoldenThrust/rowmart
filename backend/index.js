@@ -3,12 +3,14 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { PinataSDK } from "pinata"
 
-import mongoosePlugin from "./plugins/mongoosePlugin.js"
-import ethersPlugin from "./plugins/ethersPlugin.js"
+import mongoosePlugin from "./plugins/mongoose.plugin.js"
+import ethersPlugin from "./plugins/ethers.plugin.js"
 import productRoutes from "./routes/productsRoute.js"
 import transactionRoute from "./routes/transactionRoute.js"
 import Product from "./models/product.js"
-import mailerPlugin from "./plugins/mailer.js"
+import mailerPlugin from "./plugins/mailer.plugin.js"
+import redisPlugin from "./plugins/redis.plugin.js"
+import cleanupPlugin from "./plugins/cleanup.plugin.js"
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -42,11 +44,15 @@ await fastify.register(import('@fastify/multipart'), {
   },
 })
 
-fastify.register(mailerPlugin);
+fastify.register(redisPlugin);
 
 fastify.register(mongoosePlugin, {
   uri: process.env.MONGO_URI,
 });
+
+fastify.register(cleanupPlugin);
+
+fastify.register(mailerPlugin);
 
 fastify.register(ethersPlugin, {
   rpcUrl: process.env.RPC_URL,
