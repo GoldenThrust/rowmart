@@ -52,7 +52,10 @@ Rename the .env.example file to .env in the contract directory and update the en
     ```
     npx hardhat test
     ```
-
+4. Start a local Hardhat node
+    ```
+    npx hardhat node
+    ```
 ## 🚢 Deployment
 1. Deploy the smart contracts to the desired network:
     ```bash
@@ -62,7 +65,8 @@ Rename the .env.example file to .env in the contract directory and update the en
     # Sepolia testnet
     npx hardhat run scripts/deploy.ts --network sepolia
 
-    # Ethereum mainnet (you have to uncomment the mainnet configuration in hardhat.config.ts)
+    # Ethereum mainnet
+    # (Uncomment the mainnet configuration in hardhat.config.ts first)
     npx hardhat run scripts/deploy.ts --network mainnet
     ```
 2. Verify contract
@@ -78,6 +82,11 @@ Rename the .env.example file to .env in the contract directory and update the en
     ]
     ```
 2. Run the minting script:
+   1. Hardhat (local network)
+    ```bash
+    npx hardhat run scripts/mintMNEE.ts
+    ```
+   2. Sepolia testnet
     ```bash
     npx hardhat run scripts/mintMNEETestNet.ts
     ```

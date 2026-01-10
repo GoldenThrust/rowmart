@@ -31,7 +31,7 @@ Rowmart is designed to be secure, transparent, and creator-friendly, eliminating
 [![Smart Contracts](https://img.shields.io/badge/Contracts-MOCKMNEE%20TESTNET-orange?style=for-the-badge)](http://sepolia.etherscan.io/address/0x6247E28B65fFDd7e75823F0b580919dB8B01B0c6)  
 <!-- [![YouTube Demo](https://img.shields.io/badge/Video-Demo-red?style=for-the-badge)](https://youtube.com/watch?v=YOUR_VIDEO_ID)   -->
 
-⚠️ **Note:** This project is currently deployed on **testnet** for development and testing purposes.
+⚠️ **Note:** This project is currently deployed on **testnet** for development and testing purposes. Refer to frontend [README](/frontend/README.md#-wallet-configuration) on how to get sepolia ETH and mockMNEE token.
 
 
 ## 🖼️ Preview

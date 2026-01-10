@@ -13,6 +13,8 @@ The **Rowmart frontend** is a Web3-enabled marketplace interface that allows use
   - [⚙️ Environment Variables](#️-environment-variables)
   - [🚀 Getting Started](#-getting-started)
   - [🔐 Wallet Configuration](#-wallet-configuration)
+    - [Local Development (Hardhat Network)](#local-development-hardhat-network)
+    - [Sepolia Testnet](#sepolia-testnet)
   - [🧩 Notes](#-notes)
   - [📜 License](#-license)
 
@@ -69,15 +71,21 @@ npm install
 npm run dev
 ```
 
-> The app will be available at: http://localhost:5173
+> The app will be available at: http://localhost:5173 
 
 ## 🔐 Wallet Configuration
+### Local Development (Hardhat Network)
+- Ensure your wallet contains **Hardhat ETH**.
+- You can obtain this by importing one of the test accounts displayed when you run: `npx hardhat node` in the contracts directory.
 
-- Network: Sepolia Testnet
+If you are using the mock MNEE contract for testing, refer to the contracts [README](/contracts/README.md#-mint-mock-mnee) for instructions on how to mint mock MNEE tokens.
 
-- Ensure your wallet contains Sepolia ETH. You can obtain it from the [Google Cloud Sepolia Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia). If you are using the mock MNEE contract for testing, refer to the contracts [README](/contracts/README.md) for instructions on how to mint mock MNEE tokens.
+### Sepolia Testnet
+- Ensure your wallet contains Sepolia ETH.
 
-- Switch network if prompted
+- You can obtain Sepolia ETH from the [Google Cloud Sepolia Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia).
+
+If you are using the mock MNEE contract for testing, refer to the contracts [README](/contracts/README.md#-mint-mock-mnee) for instructions on how to mint mock MNEE tokens.
 
 
 ## 🧩 Notes
