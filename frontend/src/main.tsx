@@ -16,7 +16,6 @@ import { Error404 } from "./Error404.tsx";
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
 const queryClient = new QueryClient();
 
-
 const router = createBrowserRouter([
   {
     path: '/',
@@ -29,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider 
+        <RainbowKitProvider  coolMode
           theme={darkTheme({
             accentColor: "#102e43ff",
             accentColorForeground: "white",

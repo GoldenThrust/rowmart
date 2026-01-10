@@ -6,12 +6,8 @@ import { getProductCount } from "../contract/services/getProductCount.js";
 import { File } from "buffer";
 import Review from "../models/review.js";
 
-// TODO: listen to product events and update status and productId accordingly
-// TODO: delete product that are not on chain. 
-export default async function productRoutes(fastify, opts) {
+export default async function productRoutes(fastify) {
     const { pinata } = fastify;
-    // TODO: Listen to create Product event and send mail
-    // TODO: Delete product after 20 minute of no CreateProduct Events
     // ---------------- CREATE PRODUCT ----------------
     fastify.post(
         "/create-product",

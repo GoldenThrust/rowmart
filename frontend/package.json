@@ -30,7 +30,6 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.55.1",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",

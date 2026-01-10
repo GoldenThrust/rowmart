@@ -7,7 +7,7 @@ import { useAllowance } from "./useAllowance";
 import { useTaskQueue } from "../../store/useTaskQueue";
 import { Dispatch, SetStateAction } from "react";
 
-// TODO: estimate gas price to decide if user can pray and approve transaction
+// TODO: estimate gas price to decide if user can pay and approve transaction
 export default function useCreateTransaction() {
   const { enqueue } = useTaskQueue();
 

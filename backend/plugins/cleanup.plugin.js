@@ -4,6 +4,7 @@ import { Queue, Worker } from "bullmq";
 import Product from "../models/product.js";
 import Transaction from "../models/transaction.js";
 
+// sync offchain and onchain data
 export default fp(async (fastify) => {
   const queueName = "cleanup-queue";
 

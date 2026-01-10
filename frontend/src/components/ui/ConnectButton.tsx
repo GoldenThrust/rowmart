@@ -6,6 +6,7 @@ import { useConnection } from "wagmi";
 import { useTokenDetails } from "../../contracts/hooks/useTokenDetails";
 import useReadBalance from "../../contracts/hooks/useReadBalance";
 import { formatNumber } from "../../utils";
+import { useEffect, useState } from "react";
 
 /* --------------------------- Component --------------------------- */
 
@@ -30,21 +31,45 @@ export const AccountConnectButton = ({
           ready &&
           account &&
           chain &&
-          (!authenticationStatus ||
-            authenticationStatus === "authenticated");
+          (!authenticationStatus || authenticationStatus === "authenticated");
 
         const { balance, formatedBalance, ethBalance } = readBalance;
         const { symbol } = useTokenDetails();
-        const icon = useConnection()?.connector?.icon;
+        const { connector } = useConnection();
+        const icon = connector?.icon;
+        const rkDetails = connector?.rkDetails as IconConfig;
+
+        const [iconDetails, setIconDetails] = useState<IconState>({
+          iconAccent: "#000",
+          iconBackground: "#fdc700",
+          icon: icon ?? "",
+        });
+
+        useEffect(() => {
+          if (!rkDetails?.iconUrl) {
+            setIconDetails((state) => ({
+              ...state,
+              icon: icon ?? "",
+            }));
+            return;
+          }
+
+          rkDetails.iconUrl().then((resolvedIcon) => {
+            console.log(resolvedIcon);
+            setIconDetails((state) => ({
+              ...state,
+              iconAccent: rkDetails.iconAccent,
+              iconBackground: rkDetails.iconBackground,
+              icon: resolvedIcon,
+            }));
+          });
+        }, [rkDetails, icon]);
 
         const displayBalance =
           balance !== undefined
             ? `${formatNumber(formatedBalance)} ${symbol}`
             : `${formatNumber(
-                formatUnits(
-                  ethBalance?.value ?? 0n,
-                  ethBalance?.decimals ?? 18
-                )
+                formatUnits(ethBalance?.value ?? 0n, ethBalance?.decimals ?? 18)
               )} ${ethBalance?.symbol ?? "ETH"}`;
 
         return (
@@ -123,10 +148,15 @@ export const AccountConnectButton = ({
                         className="w-5 h-5 rounded-full"
                       />
                     ) : (
-                      <div className="w-5 h-5 rounded-full overflow-hidden bg-yellow-400">
-                        {icon && (
+                      <div
+                        className="w-5 h-5 rounded-full overflow-hidden"
+                        style={{
+                          backgroundColor: iconDetails.iconBackground
+                        }}
+                      >
+                        {iconDetails.icon && (
                           <img
-                            src={icon}
+                            src={iconDetails.icon}
                             alt="wallet"
                             className="w-full h-full"
                           />

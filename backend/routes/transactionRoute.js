@@ -3,7 +3,6 @@ import Product from "../models/product.js";
 import Transaction from "../models/transaction.js";
 import { createTransactionSchema, deleteTransactionSchema, getTransactionSchema, getTransactionsSchema, updateTransactionSchema } from "../schemas/transaction.schema.js";
 
-// TODO: listen to transaction events and update status and transactionId accordingly
 export default async function transactionRoute(fastify) {
     const { pinata } = fastify;
     // ---------------- CREATE Transaction ----------------
@@ -13,7 +12,6 @@ export default async function transactionRoute(fastify) {
         async (request, reply) => {
             try {
                 const fields = request.body;
-                // Read transactionCount from blockchain
                 const transactionCount = await getTransactionCount(fastify);
 
                 // Upload to Pinata

@@ -6,7 +6,7 @@ import useConfirmDelivery from "../../contracts/hooks/useConfirmDelivery";
 import toast from "react-hot-toast";
 import useCreateDispute from "../../contracts/hooks/useCreateDispute";
 
-// TODO: Add Pagination
+// TODO: Change Pagination to scroll
 /* ---------------------------- Helpers ---------------------------- */
 const shortAddress = (addr?: string) =>
   addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
@@ -97,7 +97,7 @@ export default function Orders({
     }
   }
 
-  // TODO: use backend Event to update Dispute details and rating and review instead of using. axios
+  // TODO: use backend Event to update Dispute details, rating and review instead of using. axios
 
   async function openDispute(order: Order) {
     try {
