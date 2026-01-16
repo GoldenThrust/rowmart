@@ -18,14 +18,13 @@ export default function CreateProduct({
   const [userEmail, setUserEmail] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [createProductSeccessful, setCreateProductSeccessful] =
-    useState(false);
+  const [createProductSeccessful, setCreateProductSeccessful] = useState(false);
 
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
   const { formatedBalance } = readBalance;
 
   const sufficientBalance = useMemo(
-    () => createProductFee <= formatedBalance,
+    () => Number(createProductFee) <= Number(formatedBalance),
     [createProductFee, formatedBalance]
   );
 

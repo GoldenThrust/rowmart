@@ -1,10 +1,18 @@
 import axios from "axios";
 import { X } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import useCreateReview from "../../contracts/hooks/useCreateReview";
 import { useConnection } from "wagmi";
+import useReadBalance from "../../contracts/hooks/useReadBalance";
 
 /* ----------------------------- Types ----------------------------- */
 export default function ProductDetails({
@@ -64,6 +72,13 @@ export default function ProductDetails({
       setSubmittingRating(false);
     }
   };
+
+  const { formatedBalance } = useReadBalance();
+
+  const sufficientBalance = useMemo(
+    () => totalPrice <= Number(formatedBalance),
+    [totalPrice, formatedBalance]
+  );
 
   const purchaseRef = useRef<HTMLDivElement>(null);
 
@@ -212,7 +227,10 @@ export default function ProductDetails({
           </div>
 
           {/* Right: Sticky Purchase Panel */}
-          <div className="w-11/12 mx-auto md:w-80 bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4 static top-6 self-start m-6" ref={purchaseRef}>
+          <div
+            className="w-11/12 mx-auto md:w-80 bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4 static top-6 self-start m-6"
+            ref={purchaseRef}
+          >
             <h3 className="text-sm font-medium text-white">Purchase Summary</h3>
 
             {/* Quantity */}
@@ -273,10 +291,18 @@ export default function ProductDetails({
             <div className="space-y-2 pt-2" tabIndex={0}>
               <button
                 onClick={() => buyProduct(product, quantity, email, totalPrice)}
-                disabled={disableSubmit}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-700 disabled:cursor-not-allowed py-3 rounded-xl font-semibold transition"
+                disabled={!sufficientBalance || disableSubmit}
+                className={`w-full disabled:bg-neutral-700 disabled:cursor-not-allowed py-3 rounded-xl font-semibold transition ${
+                  sufficientBalance
+                    ? "bg-emerald-500 text-black hover:bg-emerald-400"
+                    : "bg-red-600 text-white cursor-not-allowed"
+                }`}
               >
-                {disableSubmit ? "Processing…" : "Confirm Purchase"}
+                {sufficientBalance
+                  ? disableSubmit
+                    ? "Processing…"
+                    : "Confirm Purchase"
+                  : "Insufficient balance"}
               </button>
 
               <Link
