@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "contract:run": "cd ./contract && npx hardhat node",
-    "contract:deploy": "cd ./contract && npx hardhat ignition deploy ./ignition/modules/MarketPlace.ts --network localhost",
-    "contract:mint": "cd ./contract && npx hardhat run ./script/mintMNEE.ts",
+    "contract:run": "cd ./contracts && npx hardhat node",
+    "contract:deploy": "cd ./contracts && npx hardhat ignition deploy ./ignition/modules/MarketPlace.ts --network localhost",
+    "contract:mint": "cd ./contracts && npx hardhat run ./script/mintMNEE.ts",
     "dev:server": "cd ./backend && npm run dev",
     "dev:client": "cd ./frontend && npm run dev",
     "server": "cd ./backend && npm start",
