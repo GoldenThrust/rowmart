@@ -161,7 +161,7 @@ export default function Orders({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="relative bg-neutral-950 w-140 max-h-[90vh] rounded-2xl border border-neutral-800 p-6 flex flex-col gap-6">
+      <div className="relative bg-neutral-950 md:w-140 w-full max-h-[90vh] rounded-2xl border border-neutral-800 p-6 flex flex-col gap-6">
         {/* Close */}
         <X
           className="absolute right-5 top-5 cursor-pointer text-red-500"
@@ -176,7 +176,7 @@ export default function Orders({
           {/* Status Filter */}
           <div className="space-y-2">
             <p className="text-xs text-neutral-500">Status</p>
-            <div className="flex gap-2 text-xs">
+            <div className="flex gap-2 text-xs flex-wrap">
               {(
                 [
                   "all",
