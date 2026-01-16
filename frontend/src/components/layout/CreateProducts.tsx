@@ -45,6 +45,7 @@ export default function CreateProduct({
         id: "create-product",
       });
     }
+
     setSubmitting(false);
     setOpenListingForm(false);
     setCreateProductSeccessful(false);

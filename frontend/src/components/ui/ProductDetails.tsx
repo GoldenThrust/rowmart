@@ -1,6 +1,6 @@
 import axios from "axios";
 import { X } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import useCreateReview from "../../contracts/hooks/useCreateReview";
@@ -65,6 +65,15 @@ export default function ProductDetails({
     }
   };
 
+  const purchaseRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    purchaseRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [quantity, email]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="relative w-full max-w-5xl bg-neutral-950 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
@@ -78,9 +87,9 @@ export default function ProductDetails({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col md:flex-row overflow-hidden">
+        <div className="flex flex-col md:flex-row overflow-auto">
           {/* Left: Scrollable product info */}
-          <div className="flex-1 p-6 overflow-y-auto max-h-[80vh] space-y-4">
+          <div className="flex-1 p-6 md:max-h-[80vh] space-y-4">
             <img
               src={`https://ipfs.io/ipfs/${product.imageCid}`}
               alt={product.name}
@@ -203,7 +212,7 @@ export default function ProductDetails({
           </div>
 
           {/* Right: Sticky Purchase Panel */}
-          <div className="w-full md:w-80 bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4 sticky top-6 self-start m-6 md:m-0">
+          <div className="w-11/12 mx-auto md:w-80 bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4 static top-6 self-start m-6" ref={purchaseRef}>
             <h3 className="text-sm font-medium text-white">Purchase Summary</h3>
 
             {/* Quantity */}
@@ -261,7 +270,7 @@ export default function ProductDetails({
             </div>
 
             {/* Actions */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-2" tabIndex={0}>
               <button
                 onClick={() => buyProduct(product, quantity, email, totalPrice)}
                 disabled={disableSubmit}
@@ -281,7 +290,7 @@ export default function ProductDetails({
         </div>
 
         {/* Delivery Note */}
-        <div className="m-5 w-11/12 rounded-xl border border-yellow-600/40 bg-yellow-600/10 p-4 text-sm text-yellow-300">
+        <div className="m-5 w-11/12 rounded-xl border border-yellow-600/40 bg-yellow-600/10 p-4 md:text-sm text-yellow-300 text-xs">
           <span className="font-semibold">Important:</span> Ensure your email
           address is correct and active. It will be used for direct
           communication between you and the seller.
