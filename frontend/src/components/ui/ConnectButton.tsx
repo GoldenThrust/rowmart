@@ -74,6 +74,7 @@ export const AccountConnectButton = ({
 
         return (
           <div
+          className="flex justify-center"
             {...(!ready && {
               "aria-hidden": true,
               style: {

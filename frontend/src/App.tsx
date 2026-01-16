@@ -10,6 +10,7 @@ import useReadBalance from "./contracts/hooks/useReadBalance";
 import { useWatchTokenTransfers } from "./contracts/hooks/events/TransferEvents";
 import axios from "axios";
 import { useWatchTokenApproval } from "./contracts/hooks/events/ApprovalEvents";
+import { Menu, X } from "lucide-react";
 
 async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
   while (true) {
@@ -25,13 +26,14 @@ async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
 }
 
 function App() {
-  const { address, isConnected, } = useConnection();
+  const { address, isConnected } = useConnection();
   const { error } = useConnect();
 
   const [openListingForm, setOpenListingForm] = useState(false);
   const [openOrderOverlay, setOpenOrderOverlay] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
   const [serverActive, setServerActive] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
 
   const readBalance = useReadBalance();
 
@@ -70,11 +72,13 @@ function App() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between md:p-0 px-6 py-4">
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="RowMart" className="w-8 h-8" />
-            <h1 className="text-xl font-semibold tracking-tight">RowMart</h1>
+            <img src="/logo.png" alt="RowMart" className="w-8 h-8 max-w-8" />
+            <h1 className="text-xl font-semibold tracking-tight md:block hidden">
+              RowMart
+            </h1>
           </div>
 
           {/* Search */}
@@ -88,10 +92,12 @@ function App() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div
+            className={`md:items-center md:gap-4 md:flex md:flex-row md:static md:w-auto md:h-auto absolute top-0 left-0 flex-col w-full h-screen gap-10 p-5 ${openMenu ? "flex" : "hidden"}`}
+          >
             <button
               onClick={() => setOpenOrderOverlay(true)}
-              className="text-sm px-4 py-2 rounded-lg border border-neutral-800 hover:border-neutral-600 transition"
+              className="text-sm px-4 py-2 rounded-lg border border-neutral-800 hover:border-neutral-600 transition order-1"
             >
               Orders
             </button>
@@ -100,13 +106,23 @@ function App() {
 
             {isConnected && (
               <button
-                onClick={() => setOpenListingForm(true)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-sm px-4 py-2 rounded-lg font-medium transition"
+              onClick={() => setOpenListingForm(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-sm px-4 py-2 rounded-lg font-medium transition order-1"
               >
                 Sell Now
               </button>
             )}
+            <X width={`50px`} height={`50px`} color="gray" 
+            onClick={() => setOpenMenu(false)}
+            className="block md:hidden order-2 m-auto bg-neutral-800 rounded-full p-3"/>
+
           </div>
+
+          {/* mobile */}
+          <Menu
+            className="md:hidden"
+            onClick={() => setOpenMenu(true)}
+          />
         </div>
       </header>
 
