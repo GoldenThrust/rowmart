@@ -132,7 +132,7 @@ export default async function productRoutes(fastify) {
 
                 const result = await Product.findOne(id ? { _id: id } : { productId }).populate('reviews');
 
-                return reply.send({ success: true, data: result });
+                return reply.send({ success: true, product: result });
             } catch (err) {
                 request.log.error(err);
                 return reply.status(500).send({ message: "Failed to get product" });

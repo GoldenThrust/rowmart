@@ -160,10 +160,10 @@ export const getProductSchema = {
   response: {
     200: {
       type: "object",
-      required: ["success", "data"],
+      required: ["success", "product"],
       properties: {
         success: { type: "boolean" },
-        data: {
+        product: {
           type: ["object", "null"],
           properties: productProperties
         }

@@ -4,6 +4,7 @@ import ProductDetails from "../ui/ProductDetails";
 import { useConnection } from "wagmi";
 import toast from "react-hot-toast";
 import useCreateTransaction from "../../contracts/hooks/useCreateTransaction";
+import { eventBus } from "../../lib/eventBus";
 
 /* --------------------------- Component --------------------------- */
 
@@ -24,9 +25,7 @@ export default function DisplayProducts({ query }: { query: string | null }) {
 
   const { approveAndBuy, isPending } = useCreateTransaction();
 
-  /* ------------------------- Fetch Products ------------------------ */
-
-  useEffect(() => {
+  function fetchProducts() {
     axios
       .get("/get-products", {
         params: {
@@ -45,6 +44,12 @@ export default function DisplayProducts({ query }: { query: string | null }) {
         }));
       })
       .catch((err) => console.error("Error fetching products:", err));
+  }
+
+  /* ------------------------- Fetch Products ------------------------ */
+
+  useEffect(() => {
+    fetchProducts();
   }, [query, pagination.page]);
 
   useEffect(() => {
@@ -66,6 +71,9 @@ export default function DisplayProducts({ query }: { query: string | null }) {
     setCreateTransactionSeccessful(false);
   }, [createTransactionSeccessful]);
 
+  useEffect(() => {
+    console.log(document.body.scrollHeight);
+  }, [document.body.scrollHeight]);
   /* --------------------------- Buy Flow --------------------------- */
 
   const buyProduct = async (
@@ -123,6 +131,14 @@ export default function DisplayProducts({ query }: { query: string | null }) {
 
   useEffect(() => {
     setUserEmail(localStorage.getItem("user-email") ?? "");
+  }, []);
+
+  useEffect(() => {
+    eventBus.on("FETCH_PRODUCTS", fetchProducts);
+
+    return () => {
+      eventBus.on("FETCH_PRODUCTS", fetchProducts);
+    };
   }, []);
 
   /* ----------------------------- UI ------------------------------ */

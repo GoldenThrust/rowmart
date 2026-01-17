@@ -10,8 +10,9 @@ import useReadBalance from "./contracts/hooks/useReadBalance";
 import { useWatchTokenTransfers } from "./contracts/hooks/events/TransferEvents";
 import axios from "axios";
 import { useWatchTokenApproval } from "./contracts/hooks/events/ApprovalEvents";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import MobileMenu from "./components/ui/MobileMenu";
+import { useWatchProductCreated } from "./contracts/hooks/events/ProductCreatedEvents";
 
 async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
   while (true) {
@@ -48,6 +49,9 @@ function App() {
   });
 
   useWatchTokenApproval(address);
+
+
+  useWatchProductCreated();
 
   useEffect(() => {
     wakeServer(setServerActive);
