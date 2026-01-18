@@ -12,6 +12,7 @@ import "./index.css";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Error404 } from "./Error404.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
 
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
 const queryClient = new QueryClient();
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
     path: '/',
     element: <App />,
     errorElement: <Error404 />,
+  },
+  {
+    path: '/dashboard',
+    element: <Dashboard />
   }
 ]);
 

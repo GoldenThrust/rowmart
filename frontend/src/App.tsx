@@ -13,6 +13,7 @@ import { useWatchTokenApproval } from "./contracts/hooks/events/ApprovalEvents";
 import { Menu } from "lucide-react";
 import MobileMenu from "./components/ui/MobileMenu";
 import { useWatchProductCreated } from "./contracts/hooks/events/ProductCreatedEvents";
+import { Link } from "react-router-dom";
 
 async function wakeServer(setServerActive: Dispatch<SetStateAction<boolean>>) {
   while (true) {
@@ -50,7 +51,6 @@ function App() {
 
   useWatchTokenApproval(address);
 
-
   useWatchProductCreated();
 
   useEffect(() => {
@@ -85,11 +85,11 @@ function App() {
           {/* Brand */}
           <div className="flex items-center gap-3">
             <img src="/logo.png" className="w-8 h-8" />
-            <h1 className="hidden md:block text-xl font-semibold">RowMart</h1>
+            <h1 className="hidden lg:block text-xl font-semibold">RowMart</h1>
           </div>
 
           {/* Search (hidden on mobile when menu open) */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <div className="hidden lg:flex flex-1 max-w-xl mx-8">
             <input
               type="search"
               placeholder="Search products…"
@@ -99,7 +99,13 @@ function App() {
           </div>
 
           {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
+            <Link
+              to="/dashboard"
+              className="text-xs text-gray-500 hover:text-indigo-500 transition-colors duration-300 transform hover:scale-105"
+            >
+              Dashboard
+            </Link>
             <button
               onClick={() => setOpenOrderOverlay(true)}
               className="px-4 py-2 rounded-lg border border-neutral-800"
@@ -120,7 +126,7 @@ function App() {
           </div>
 
           {/* Mobile menu icon */}
-          <button className="md:hidden" onClick={() => setOpenMenu(true)}>
+          <button className="lg:hidden" onClick={() => setOpenMenu(true)}>
             <Menu />
           </button>
         </div>

@@ -75,7 +75,7 @@ Rename the .env.example file to .env in the contract directory and update the en
     ```
 
 ## 🟡 Mint Mock MNEE
-1. Add your wallet address to the `buyers` array in `scripts/mintMNEESepoloa.ts`:
+1. Add your wallet address to the `buyers` array in `scripts/mintMNEESepolia.ts`:
     ```js
     const buyer = [
         // YOUR_WALLET_ADDRESS
@@ -88,7 +88,7 @@ Rename the .env.example file to .env in the contract directory and update the en
     ```
    2. Sepolia testnet
     ```bash
-    npx hardhat run scripts/mintMNEESepoloa.ts
+    npx hardhat run scripts/mintMNEESepolia.ts
     ```
 
 ## 🧪 Testing
