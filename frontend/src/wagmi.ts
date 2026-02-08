@@ -28,7 +28,7 @@ export const rpc = (url?: string) => {
     return http();
   }
 
-  if (url.startsWith("ws://") || url.startsWith("wss://")) {
+  if (url.startsWith("ws://") || url.startsWith("wss://") || url === "http://127.0.0.1:8545") {
     return webSocket(url);
   }
 
