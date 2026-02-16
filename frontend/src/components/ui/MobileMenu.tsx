@@ -8,8 +8,8 @@ export default function MobileMenu({
   onOrders,
   onSell,
   isConnected,
-  readBalance,
 }: MobileMenuProps) {
+  
   return (
     <div
       className={`
@@ -46,7 +46,7 @@ export default function MobileMenu({
         </button>
 
         <div className="px-4">
-          <AccountConnectButton readBalance={readBalance} />
+          <AccountConnectButton />
         </div>
 
         {isConnected && (

@@ -5,5 +5,4 @@ interface MobileMenuProps {
   onOrders: () => void;
   onSell: () => void;
   isConnected: boolean;
-  readBalance: any;
 }

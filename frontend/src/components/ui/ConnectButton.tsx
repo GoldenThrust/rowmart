@@ -10,11 +10,9 @@ import { useEffect, useState } from "react";
 
 /* --------------------------- Component --------------------------- */
 
-export const AccountConnectButton = ({
-  readBalance,
-}: {
-  readBalance: ReturnType<typeof useReadBalance>;
-}) => {
+export const AccountConnectButton = () => {
+  const readBalance = useReadBalance();
+
   return (
     <ConnectButton.Custom>
       {({
@@ -69,12 +67,15 @@ export const AccountConnectButton = ({
           balance !== undefined
             ? `${formatNumber(formatedBalance)} ${symbol}`
             : `${formatNumber(
-                formatUnits(ethBalance?.value ?? 0n, ethBalance?.decimals ?? 18)
+                formatUnits(
+                  ethBalance?.value ?? 0n,
+                  ethBalance?.decimals ?? 18,
+                ),
               )} ${ethBalance?.symbol ?? "ETH"}`;
 
         return (
           <div
-          className="flex justify-center"
+            className="flex justify-center"
             {...(!ready && {
               "aria-hidden": true,
               style: {
@@ -152,7 +153,7 @@ export const AccountConnectButton = ({
                       <div
                         className="w-5 h-5 rounded-full overflow-hidden"
                         style={{
-                          backgroundColor: iconDetails.iconBackground
+                          backgroundColor: iconDetails.iconBackground,
                         }}
                       >
                         {iconDetails.icon && (

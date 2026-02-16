@@ -8,10 +8,8 @@ import { useConnection } from "wagmi";
 
 export default function CreateProduct({
   setOpenListingForm,
-  readBalance,
 }: {
   setOpenListingForm: Dispatch<SetStateAction<boolean>>;
-  readBalance: ReturnType<typeof useReadBalance>;
 }) {
   const { address } = useConnection();
 
@@ -21,11 +19,12 @@ export default function CreateProduct({
   const [createProductSeccessful, setCreateProductSeccessful] = useState(false);
 
   const { approveAndCreate, createProductFee, isPending } = useCreateProduct();
+  const readBalance = useReadBalance();
   const { formatedBalance } = readBalance;
 
   const sufficientBalance = useMemo(
     () => Number(createProductFee) <= Number(formatedBalance),
-    [createProductFee, formatedBalance]
+    [createProductFee, formatedBalance],
   );
 
   useEffect(() => {
@@ -132,7 +131,9 @@ export default function CreateProduct({
               required
               onChange={(e) =>
                 setImagePreview(
-                  e.target.files ? URL.createObjectURL(e.target.files[0]) : null
+                  e.target.files
+                    ? URL.createObjectURL(e.target.files[0])
+                    : null,
                 )
               }
             />
